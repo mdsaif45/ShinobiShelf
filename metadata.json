@@ -1,0 +1,6 @@
+{
+  "name": "ShinobiShelf",
+  "description": "Peer-to-peer community book sharing library with loans calendar, wishlist board, book clubs, honesty leaderboard, and physical pickup verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
