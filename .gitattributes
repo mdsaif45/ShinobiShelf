@@ -1,0 +1,34 @@
+# Auto-detect text files and enforce consistent LF line endings
+* text=auto eol=lf
+
+# Code and Configuration Text Files
+*.html        text eol=lf
+*.css         text eol=lf
+*.js          text eol=lf
+*.jsx         text eol=lf
+*.ts          text eol=lf
+*.tsx         text eol=lf
+*.json        text eol=lf
+*.md          text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+*.rules       text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+
+# Binary Assets & Data Files
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.gif         binary
+*.ico         binary
+*.pdf         binary
+*.woff        binary
+*.woff2       binary
+*.ttf         binary
+*.eot         binary
+*.sqlite      binary
+*.db          binary
+
+# Lockfiles & Generated Documentation
+pnpm-lock.yaml linguist-generated=true

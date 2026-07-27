@@ -189,6 +189,6 @@ router.post(
 
 ## 6. Verification and Maintenance
 
-- **Type Check**: Run `npm run lint` (`tsc --noEmit`) to verify all interfaces and class types.
-- **Build Server**: Run `npm run build` to compile client and bundle `server.ts` into `dist/server.cjs`.
-- **Start Production**: Run `npm run start` to execute `node dist/server.cjs`.
+- **Type Check**: Run `pnpm lint` (`tsc --noEmit`) to verify all interfaces and class types.
+- **Build Server**: Run `pnpm build` to compile client and bundle `server.ts` into `dist/server.cjs`.
+- **Start Production**: Run `pnpm start` to execute `node dist/server.cjs`.

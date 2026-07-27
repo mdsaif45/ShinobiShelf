@@ -1,11 +1,52 @@
+# Dependencies
 node_modules/
-build/
+.pnpm-store/
+
+# Build & Production Bundles
 dist/
-coverage/
-.DS_Store
-*.log
-.env*
+build/
+out/
+.vite/
+*.tsbuildinfo
+
+# Environment & Secrets
+.env
+.env.*
 !.env.example
 
-# local tooling cache (not part of project)
+# Databases & Runtime State
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local Tooling & Generated Analysis
 .code-review-graph/
+graphify-out/
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor Configurations
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Temporary & Cache Files
+.cache/
+.tmp/
+tmp/

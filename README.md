@@ -54,7 +54,7 @@ For detailed architecture overviews, consult:
 ### Prerequisites
 
 - Node.js (v18+)
-- npm or yarn
+- pnpm
 
 ### Installation
 
@@ -66,7 +66,7 @@ For detailed architecture overviews, consult:
 
 2. **Install dependencies:**
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Environment Setup:**
@@ -79,7 +79,7 @@ For detailed architecture overviews, consult:
 
 Run the development server (boots backend and Vite middleware on port `3000`):
 ```bash
-npm run dev
+pnpm dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -87,12 +87,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Compile the client bundle and bundle the server using `esbuild`:
 ```bash
-npm run build
+pnpm build
 ```
 
 Start the production server:
 ```bash
-npm run start
+pnpm start
 ```
 
 ---
