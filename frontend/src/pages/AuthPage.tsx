@@ -67,7 +67,12 @@ export default function AuthPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    // Clear the previous failure as soon as the user edits,
+                    // so a stale message never sits under a fresh attempt.
+                    if (error) setError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-[#E5E0D8] rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#4B5320] focus:border-[#4B5320] sm:text-sm bg-[#F9F7F4]"
                 />
               </div>
@@ -80,7 +85,10 @@ export default function AuthPage() {
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError('');
+                  }}
                   className="appearance-none block w-full px-3 py-2 border border-[#E5E0D8] rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#4B5320] focus:border-[#4B5320] sm:text-sm bg-[#F9F7F4]"
                 />
               </div>

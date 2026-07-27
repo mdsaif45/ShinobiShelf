@@ -155,8 +155,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (fbErr: any) {
         console.warn('Firebase popup sign in warning:', fbErr?.code || fbErr?.message);
-        if (fbErr?.code === 'auth/popup-closed-by-user') {
+        // The user aborted deliberately: not an error worth surfacing.
+        if (
+          fbErr?.code === 'auth/popup-closed-by-user' ||
+          fbErr?.code === 'auth/cancelled-popup-request'
+        ) {
           return;
+        }
+        // The browser refused the popup. Silently falling through leaves the
+        // user staring at an unchanged page, so surface it instead.
+        if (fbErr?.code === 'auth/popup-blocked') {
+          throw new Error(
+            'Your browser blocked the Google sign-in popup. Allow popups for this site and try again.'
+          );
         }
       }
 
@@ -209,14 +220,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // 3. Fallback: Local Google Authentication
       await handleGoogleCallback();
     } catch (err: any) {
-      console.warn('Google auth error fallback activated:', err);
+      console.error('Google auth failed:', err);
+      // Only fall back to the local stub account when no real Google
+      // credentials are configured (local dev without GOOGLE_CLIENT_ID).
+      // Once OAuth is configured, a failure must surface to the user rather
+      // than silently signing everyone into one shared stub identity.
+      let configured = false;
+      try {
+        const probe = await fetch('/api/auth/google/url');
+        configured = (await probe.json())?.configured === true;
+      } catch {
+        // Treated as unconfigured below.
+      }
+
+      if (configured) {
+        throw err instanceof Error ? err : new Error('Google sign-in failed. Please try again.');
+      }
+
       const res = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           googleToken: 'ya29.google_oauth_access_token_' + Math.random().toString(36).substring(2),
-          email: 'google_user@gmail.com',
-          displayName: 'Google Reader',
+          email: `dev_google_user_${Math.random().toString(36).substring(2, 10)}@example.com`,
+          displayName: 'Google Reader (dev)',
           googleId: 'gid_' + Math.random().toString(36).substring(2),
         }),
       });
