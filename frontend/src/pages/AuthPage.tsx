@@ -30,7 +30,8 @@ export default function AuthPage() {
         navigate('/library');
       } else {
         await registerWithEmail(email, password);
-        navigate('/library');
+        // New accounts complete their profile first.
+        navigate('/onboarding');
       }
     } catch (err: any) {
       setError(err.message || 'Authentication failed.');

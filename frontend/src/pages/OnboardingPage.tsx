@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../providers/AuthProvider';
+import { updateUserProfile } from '../services/userService';
 
 const GENRES = [
   'Fiction', 'Non-Fiction', 'Science Fiction', 'Fantasy', 'Mystery', 
@@ -10,21 +12,58 @@ const GENRES = [
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { user, updateUserInState } = useAuth();
 
   // Step 1
   const [name, setName] = useState('');
   const [dob, setDob] = useState('');
-  
+
   // Step 2
   const [favoriteBook, setFavoriteBook] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
-  const handleNext = () => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  const handleNext = async () => {
     if (step === 1 && name) {
       setStep(2);
-    } else if (step === 2) {
-      // Complete onboarding, save to DB in a real app, then navigate
+      return;
+    }
+    if (step !== 2) return;
+
+    if (!user) {
       navigate('/library');
+      return;
+    }
+
+    setSaveError('');
+    setIsSaving(true);
+    try {
+      // NOTE: the users table has no date_of_birth / favorite_book column yet,
+      // so the favorite book is kept in `bio` rather than being dropped.
+      const updates: Record<string, unknown> = {
+        displayName: name.trim(),
+        favoriteGenres: selectedGenres,
+      };
+      if (favoriteBook.trim()) {
+        updates.bio = `Favorite book: ${favoriteBook.trim()}`;
+      }
+      const updated = await updateUserProfile(user.id, updates);
+      if (updated?.error) {
+        setSaveError(updated.error);
+        return;
+      }
+      updateUserInState({
+        displayName: updated.displayName ?? (updates.displayName as string),
+        favoriteGenres: updated.favoriteGenres ?? (updates.favoriteGenres as string[]),
+      });
+      navigate('/library');
+    } catch (err: any) {
+      console.error('Onboarding save error:', err);
+      setSaveError(err.message || 'Could not save your details. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -146,6 +185,10 @@ export default function OnboardingPage() {
             )}
           </AnimatePresence>
 
+          {saveError && (
+            <div className="mt-6 text-sm font-medium text-red-500">{saveError}</div>
+          )}
+
           <div className="mt-10 flex justify-between items-center pt-6 border-t border-[#E5E0D8]">
             {step === 2 ? (
               <button
@@ -158,10 +201,10 @@ export default function OnboardingPage() {
             
             <button
               onClick={handleNext}
-              disabled={step === 1 && !name}
+              disabled={(step === 1 && !name) || isSaving}
               className="px-8 py-2.5 rounded-xl shadow-sm text-sm font-medium text-white bg-[#4B5320] hover:bg-[#3D441A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4B5320] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {step === 1 ? 'Continue' : 'Enter the Library'}
+              {step === 1 ? 'Continue' : isSaving ? 'Saving...' : 'Enter the Library'}
             </button>
           </div>
         </div>
