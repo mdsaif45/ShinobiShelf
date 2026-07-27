@@ -15,7 +15,7 @@ cd shinobishelf
 
 ### 2. Install Dependencies
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. Setup Environment Variables
@@ -26,7 +26,7 @@ cp .env.example .env
 
 ### 4. Run Development Server
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ---
@@ -58,7 +58,7 @@ Refer to:
 3. **Validate Code Before Committing**:
    Run type checks and linter prior to pushing:
    ```bash
-   npm run lint
+   pnpm lint
    ```
 
 4. **Write Meaningful Commit Messages**:
@@ -77,8 +77,8 @@ Refer to:
 ## 🧪 Testing & Quality Assurance
 
 Before submitting your PR, ensure:
-- The app builds without error using `npm run build`.
-- Type checking passes with zero errors (`npm run lint`).
+- The app builds without error using `pnpm build`.
+- Type checking passes with zero errors (`pnpm lint`).
 - UI controls function properly across desktop and mobile screens.
 
 ---

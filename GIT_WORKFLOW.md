@@ -100,8 +100,8 @@ git commit -m "docs(readme): add directory layout overview"
 
 2. **Automated CI Checks**:
    Every PR triggers GitHub Actions (`.github/workflows/ci.yml`) to run:
-   - TypeScript compilation check (`npm run lint`)
-   - Production bundle test (`npm run build`)
+   - TypeScript compilation check (`pnpm lint`)
+   - Production bundle test (`pnpm build`)
 
 3. **Code Review Criteria**:
    - At least 1 code owner review approval.

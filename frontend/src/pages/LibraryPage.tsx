@@ -55,6 +55,7 @@ export default function LibraryPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMobileMoreSheetOpen, setIsMobileMoreSheetOpen] = useState(false);
+  const [isMobileProfileSheetOpen, setIsMobileProfileSheetOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [books, setBooks] = useState<any[]>([]);
   const [selectedBook, setSelectedBook] = useState<any | null>(null);
@@ -118,16 +119,21 @@ export default function LibraryPage() {
             <Button 
               onClick={() => setIsAddModalOpen(true)} 
               size="sm" 
-              className="flex gap-1.5 rounded-xl bg-[#4B5320] text-white hover:bg-[#3D441A] shadow-md shadow-[#4B5320]/10 text-xs py-2 px-2.5 sm:px-3.5 shrink-0"
+              className="hidden md:flex gap-1.5 rounded-xl bg-[#4B5320] text-white hover:bg-[#3D441A] shadow-md shadow-[#4B5320]/10 text-xs py-2 px-2.5 sm:px-3.5 shrink-0"
             >
               <Plus className="w-4 h-4" /> 
-              <span className="hidden sm:inline">Add Book</span>
-              <span className="sm:hidden">Add</span>
+              <span>Add Book</span>
             </Button>
 
             <div className="relative">
               <button 
-                onClick={() => setDropdownOpen(!dropdownOpen)} 
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsMobileProfileSheetOpen(true);
+                  } else {
+                    setDropdownOpen(!dropdownOpen);
+                  }
+                }} 
                 className="rounded-full focus:outline-none focus:ring-2 focus:ring-[#4B5320]"
               >
                 <Avatar className="w-8 h-8 cursor-pointer border-2 border-white shadow-sm ring-2 ring-transparent hover:ring-[#E5E0D8] transition-all bg-[#D4A373]">
@@ -145,7 +151,7 @@ export default function LibraryPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-56 rounded-xl border border-[#E5E0D8] shadow-lg font-sans bg-white p-2 z-50"
+                    className="hidden md:block absolute right-0 mt-2 w-56 rounded-xl border border-[#E5E0D8] shadow-lg font-sans bg-white p-2 z-50"
                   >
                     <div className="px-2 py-1.5 text-xs font-serif font-semibold text-[#2C2C2C]">
                       {user?.displayName || 'My Account'}
@@ -203,8 +209,8 @@ export default function LibraryPage() {
           </div>
         </div>
 
-        {/* Tab Navigation Track */}
-        <div className="w-full">
+        {/* Tab Navigation Track (Desktop only) */}
+        <div className="w-full hidden md:block">
           <div className="bg-white/90 p-1.5 rounded-2xl border border-[#E5E0D8] shadow-sm backdrop-blur-md flex items-center justify-between gap-1.5 w-full">
             <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar flex-1">
               {PRIMARY_TABS.map((tab) => {
@@ -311,20 +317,20 @@ export default function LibraryPage() {
             {activeTab === 'global' && (
               <div className="space-y-6">
                 {/* Search & Genre Filter Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white border border-[#E5E0D8] rounded-2xl">
-                  <div className="relative w-full sm:w-auto flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <div className="flex flex-row items-center justify-between gap-2 p-2 sm:p-4 bg-white border border-[#E5E0D8] rounded-xl sm:rounded-2xl">
+                  <div className="relative flex-1 min-w-0">
+                    <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Filter by title or author..."
-                      className="w-full pl-9 pr-4 py-2 bg-[#F9F7F4] border border-[#E5E0D8] rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#4B5320]"
+                      placeholder="Filter title or author..."
+                      className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-[#F9F7F4] border border-[#E5E0D8] rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#4B5320]"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <span className="text-xs text-[#8C867E]">Category:</span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="hidden sm:inline text-xs text-[#8C867E]">Category:</span>
                     <CustomSelect
                       options={GENRE_OPTIONS}
                       value={selectedGenre}
@@ -555,6 +561,104 @@ export default function LibraryPage() {
                     );
                   })}
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Profile Sheet Drawer */}
+      <AnimatePresence>
+        {isMobileProfileSheetOpen && (
+          <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileProfileSheetOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative bg-white w-full max-w-lg rounded-t-3xl p-5 shadow-2xl z-10 space-y-4 max-h-[85vh] overflow-y-auto"
+            >
+              {/* Handle Bar */}
+              <div className="w-12 h-1.5 bg-[#E5E0D8] rounded-full mx-auto -mt-1 mb-2" />
+
+              {/* Profile Card Header */}
+              <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-12 h-12 border-2 border-[#4B5320]/20 shadow-sm bg-[#D4A373]">
+                    <AvatarImage src={user?.photoURL || ""} />
+                    <AvatarFallback className="text-white font-serif text-lg bg-transparent">
+                      {user?.displayName?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-serif text-base font-bold text-[#2C2C2C] leading-snug">
+                      {user?.displayName || 'My Account'}
+                    </h3>
+                    <p className="text-xs text-[#8C867E] truncate max-w-[200px]">
+                      {user?.email || 'Logged in user'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsMobileProfileSheetOpen(false)}
+                  className="p-2 rounded-full bg-[#F5F2ED] text-[#8C867E] hover:text-[#2C2C2C] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Circle Location Selector */}
+              <div className="space-y-1.5 bg-[#F9F7F4] p-3 rounded-2xl border border-[#E5E0D8]">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C867E] flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-[#4B5320]" />
+                  <span>Circle Location</span>
+                </div>
+                <CustomSelect
+                  options={CIRCLE_OPTIONS}
+                  value={selectedCircle}
+                  onChange={setSelectedCircle}
+                  variant="pill"
+                  icon={<Users className="w-3.5 h-3.5 text-[#4B5320]" />}
+                />
+              </div>
+
+              {/* Actions List */}
+              <div className="space-y-2 pt-1">
+                <button 
+                  onClick={() => {
+                    setIsMobileProfileSheetOpen(false);
+                    navigate('/profile');
+                  }} 
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-[#F9F7F4] hover:bg-[#F5F2ED] transition-colors text-xs font-semibold text-[#2C2C2C] border border-[#E5E0D8]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-[#4B5320]/10 text-[#4B5320]">
+                      <Settings className="w-4 h-4" />
+                    </div>
+                    <span>My Profile & Settings</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 -rotate-90 text-[#8C867E]" />
+                </button>
+
+                <button 
+                  onClick={() => {
+                    setIsMobileProfileSheetOpen(false);
+                    handleLogout();
+                  }} 
+                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-red-50 hover:bg-red-100/80 transition-colors text-xs font-semibold text-red-600 border border-red-100"
+                >
+                  <div className="p-2 rounded-xl bg-red-100 text-red-600">
+                    <LogOut className="w-4 h-4" />
+                  </div>
+                  <span>Sign out</span>
+                </button>
               </div>
             </motion.div>
           </div>

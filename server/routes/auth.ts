@@ -117,7 +117,8 @@ router.post('/login', async (req: Request, res: Response) => {
 // 3. GET GOOGLE OAUTH URL
 router.get('/google/url', (req: Request, res: Response) => {
   const origin = req.headers.origin || process.env.APP_URL || 'http://localhost:3000';
-  const redirectUri = `${origin}/auth/callback`;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/auth/callback`;
+  const isConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const clientId = process.env.GOOGLE_CLIENT_ID || (firebaseConfig as any).oAuthClientId || 'google-client-id-shinobishelf';
 
   const params = new URLSearchParams({
@@ -130,7 +131,7 @@ router.get('/google/url', (req: Request, res: Response) => {
   });
 
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  res.json({ url: authUrl, redirectUri });
+  res.json({ url: authUrl, redirectUri, configured: isConfigured });
 });
 
 // 4. GOOGLE OAUTH REGISTRATION & LOGIN (SAVES TOKEN TO SQLITE DB)
