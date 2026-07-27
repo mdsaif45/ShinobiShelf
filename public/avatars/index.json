@@ -1,0 +1,272 @@
+[
+  {
+    "category": "letters",
+    "label": "Monogram A",
+    "src": "/avatars/letters/letter-a.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram B",
+    "src": "/avatars/letters/letter-b.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram C",
+    "src": "/avatars/letters/letter-c.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram D",
+    "src": "/avatars/letters/letter-d.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram E",
+    "src": "/avatars/letters/letter-e.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram F",
+    "src": "/avatars/letters/letter-f.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram G",
+    "src": "/avatars/letters/letter-g.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram H",
+    "src": "/avatars/letters/letter-h.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram I",
+    "src": "/avatars/letters/letter-i.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram J",
+    "src": "/avatars/letters/letter-j.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram K",
+    "src": "/avatars/letters/letter-k.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram L",
+    "src": "/avatars/letters/letter-l.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram M",
+    "src": "/avatars/letters/letter-m.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram N",
+    "src": "/avatars/letters/letter-n.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram O",
+    "src": "/avatars/letters/letter-o.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram P",
+    "src": "/avatars/letters/letter-p.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram Q",
+    "src": "/avatars/letters/letter-q.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram R",
+    "src": "/avatars/letters/letter-r.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram S",
+    "src": "/avatars/letters/letter-s.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram T",
+    "src": "/avatars/letters/letter-t.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram U",
+    "src": "/avatars/letters/letter-u.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram V",
+    "src": "/avatars/letters/letter-v.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram W",
+    "src": "/avatars/letters/letter-w.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram X",
+    "src": "/avatars/letters/letter-x.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram Y",
+    "src": "/avatars/letters/letter-y.svg"
+  },
+  {
+    "category": "letters",
+    "label": "Monogram Z",
+    "src": "/avatars/letters/letter-z.svg"
+  },
+  {
+    "category": "reading",
+    "label": "open book 1",
+    "src": "/avatars/reading/open-book-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "open book 2",
+    "src": "/avatars/reading/open-book-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "closed book 1",
+    "src": "/avatars/reading/closed-book-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "closed book 2",
+    "src": "/avatars/reading/closed-book-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "book stack 1",
+    "src": "/avatars/reading/book-stack-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "book stack 2",
+    "src": "/avatars/reading/book-stack-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "bookmark 1",
+    "src": "/avatars/reading/bookmark-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "bookmark 2",
+    "src": "/avatars/reading/bookmark-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "spectacles 1",
+    "src": "/avatars/reading/spectacles-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "spectacles 2",
+    "src": "/avatars/reading/spectacles-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "quill 1",
+    "src": "/avatars/reading/quill-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "quill 2",
+    "src": "/avatars/reading/quill-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "lamp 1",
+    "src": "/avatars/reading/lamp-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "lamp 2",
+    "src": "/avatars/reading/lamp-2.svg"
+  },
+  {
+    "category": "reading",
+    "label": "cup 1",
+    "src": "/avatars/reading/cup-1.svg"
+  },
+  {
+    "category": "reading",
+    "label": "cup 2",
+    "src": "/avatars/reading/cup-2.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 1",
+    "src": "/avatars/abstract/abstract-01.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 2",
+    "src": "/avatars/abstract/abstract-02.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 3",
+    "src": "/avatars/abstract/abstract-03.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 4",
+    "src": "/avatars/abstract/abstract-04.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 5",
+    "src": "/avatars/abstract/abstract-05.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 6",
+    "src": "/avatars/abstract/abstract-06.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 7",
+    "src": "/avatars/abstract/abstract-07.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 8",
+    "src": "/avatars/abstract/abstract-08.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 9",
+    "src": "/avatars/abstract/abstract-09.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 10",
+    "src": "/avatars/abstract/abstract-10.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 11",
+    "src": "/avatars/abstract/abstract-11.svg"
+  },
+  {
+    "category": "abstract",
+    "label": "Abstract 12",
+    "src": "/avatars/abstract/abstract-12.svg"
+  }
+]
