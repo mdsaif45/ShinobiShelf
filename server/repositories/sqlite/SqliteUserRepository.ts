@@ -52,8 +52,10 @@ export class SqliteUserRepository implements IUserRepository {
            updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
         [
-          data.displayName,
-          data.photoURL,
+          // sql.js rejects `undefined` as a bind value; use null so the
+          // COALESCE(?, col) keeps the existing column value.
+          data.displayName ?? null,
+          data.photoURL ?? null,
           data.googleId,
           data.googleAccessToken || '',
           userId,
