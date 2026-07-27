@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Modal } from '@/components/ui/Modal';
+import { AvatarPicker } from '@/components/ui/AvatarPicker';
 import { useAuth } from '../providers/AuthProvider';
 import { updateUserProfile } from '../services/userService';
 import { subscribeToBooks } from '../services/bookService';
@@ -29,15 +30,6 @@ const PRESET_GENRES = [
   'Fiction', 'Philosophy', 'Sci-Fi', 'Mystery', 
   'Non-Fiction', 'Fantasy', 'History', 'Poetry', 
   'Biography', 'Psychology', 'Art', 'Classics'
-];
-
-const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=250',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=250'
 ];
 
 export default function ProfilePage() {
@@ -519,34 +511,12 @@ export default function ProfilePage() {
                   {editDisplayName.charAt(0) || 'R'}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <input 
-                  type="url"
-                  placeholder="https://example.com/photo.jpg"
-                  value={editPhotoURL}
-                  onChange={(e) => setEditPhotoURL(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-[#E5E0D8] rounded-xl bg-[#F9F7F4] focus:outline-none focus:ring-2 focus:ring-[#4B5320]"
-                />
-                <p className="text-[11px] text-gray-500 mt-1">Paste image URL or pick a preset below</p>
-              </div>
+              <p className="flex-1 text-[11px] text-gray-500">
+                Choose an avatar from the set below.
+              </p>
             </div>
 
-            {/* Quick avatar preset picks */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              <span className="text-xs text-gray-400 font-medium">Presets:</span>
-              {PRESET_AVATARS.map((url, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setEditPhotoURL(url)}
-                  className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all ${
-                    editPhotoURL === url ? 'border-[#4B5320] scale-110 shadow-sm' : 'border-transparent opacity-80 hover:opacity-100'
-                  }`}
-                >
-                  <img src={url} alt={`Preset ${idx + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+            <AvatarPicker value={editPhotoURL} onChange={setEditPhotoURL} />
           </div>
 
           {/* Display Name */}
