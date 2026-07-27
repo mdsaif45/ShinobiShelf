@@ -20,6 +20,7 @@ import LeaderboardBadgesTab from '../components/features/LeaderboardBadgesTab';
 import PhysicalSwapsTab from '../components/features/PhysicalSwapsTab';
 
 import { CustomSelect } from '@/components/ui/CustomSelect';
+import { FEATURES } from '@/config/features';
 
 const CIRCLE_OPTIONS = [
   { value: 'Neighborhood Circle', label: 'Main Neighborhood Circle 📍' },
@@ -156,17 +157,21 @@ export default function LibraryPage() {
                     <div className="px-2 py-1.5 text-xs font-serif font-semibold text-[#2C2C2C]">
                       {user?.displayName || 'My Account'}
                     </div>
-                    <div className="h-px bg-[#E5E0D8] my-1 mx-1" />
-                    <div className="px-2 py-1.5">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C867E] mb-1">Circle Location</div>
-                      <CustomSelect
-                        options={CIRCLE_OPTIONS}
-                        value={selectedCircle}
-                        onChange={setSelectedCircle}
-                        variant="pill"
-                        icon={<Users className="w-3.5 h-3.5 text-[#4B5320]" />}
-                      />
-                    </div>
+                    {FEATURES.circleLocation && (
+                      <>
+                        <div className="h-px bg-[#E5E0D8] my-1 mx-1" />
+                        <div className="px-2 py-1.5">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C867E] mb-1">Circle Location</div>
+                          <CustomSelect
+                            options={CIRCLE_OPTIONS}
+                            value={selectedCircle}
+                            onChange={setSelectedCircle}
+                            variant="pill"
+                            icon={<Users className="w-3.5 h-3.5 text-[#4B5320]" />}
+                          />
+                        </div>
+                      </>
+                    )}
                     <div className="h-px bg-[#E5E0D8] my-1 mx-1" />
                     <button 
                       onClick={() => navigate('/profile')} 
@@ -198,10 +203,12 @@ export default function LibraryPage() {
               <h1 className="text-2xl sm:text-3xl font-serif tracking-tight text-[#2C2C2C]">
                 {activeTab === 'global' ? 'Catalog' : activeTab === 'loans' ? 'Loans' : activeTab === 'analytics' ? 'Analytics' : activeTab === 'wishlist' ? 'Wishlist' : activeTab === 'clubs' ? 'Book Clubs' : activeTab === 'leaderboard' ? 'Rankings' : activeTab === 'swaps' ? 'Swaps' : 'My Books'}
               </h1>
-              <div className="flex items-center gap-1.5 bg-white border border-[#E5E0D8] rounded-full px-2.5 py-1 text-[11px] text-[#4B5320] font-medium shadow-2xs">
-                <Users className="w-3 h-3 text-[#4B5320]" />
-                <span>{selectedCircle}</span>
-              </div>
+              {FEATURES.circleLocation && (
+                <div className="flex items-center gap-1.5 bg-white border border-[#E5E0D8] rounded-full px-2.5 py-1 text-[11px] text-[#4B5320] font-medium shadow-2xs">
+                  <Users className="w-3 h-3 text-[#4B5320]" />
+                  <span>{selectedCircle}</span>
+                </div>
+              )}
             </div>
             <p className="text-xs text-[#8C867E]">
               {activeTab === 'global' ? 'Discover and borrow books shared by members in your selected circle.' : activeTab === 'loans' ? 'Track upcoming loan deadlines, start dates, and request approvals.' : activeTab === 'analytics' ? 'View your honesty score, reading velocity, and return statistics.' : activeTab === 'wishlist' ? 'Post book requests or lend copies to fellow members.' : activeTab === 'clubs' ? 'Join reading clubs, post reflections, and coordinate meetups.' : activeTab === 'leaderboard' ? 'Recognizing top punctual readers, generous lenders, and earned badges.' : activeTab === 'swaps' ? 'Confirm book handoffs with 4-digit PINs, explore local dropoff spots, and join swap events.' : 'Manage your listed book collection.'}
@@ -615,19 +622,21 @@ export default function LibraryPage() {
               </div>
 
               {/* Circle Location Selector */}
-              <div className="space-y-1.5 bg-[#F9F7F4] p-3 rounded-2xl border border-[#E5E0D8]">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C867E] flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-[#4B5320]" />
-                  <span>Circle Location</span>
+              {FEATURES.circleLocation && (
+                <div className="space-y-1.5 bg-[#F9F7F4] p-3 rounded-2xl border border-[#E5E0D8]">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C867E] flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#4B5320]" />
+                    <span>Circle Location</span>
+                  </div>
+                  <CustomSelect
+                    options={CIRCLE_OPTIONS}
+                    value={selectedCircle}
+                    onChange={setSelectedCircle}
+                    variant="pill"
+                    icon={<Users className="w-3.5 h-3.5 text-[#4B5320]" />}
+                  />
                 </div>
-                <CustomSelect
-                  options={CIRCLE_OPTIONS}
-                  value={selectedCircle}
-                  onChange={setSelectedCircle}
-                  variant="pill"
-                  icon={<Users className="w-3.5 h-3.5 text-[#4B5320]" />}
-                />
-              </div>
+              )}
 
               {/* Actions List */}
               <div className="space-y-2 pt-1">
