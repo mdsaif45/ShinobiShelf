@@ -3,7 +3,9 @@
 import "dotenv/config";
 import { createApp } from "./server/app";
 
-const PORT = 3000;
+// Hosting platforms (Render, Railway, Fly, Heroku) assign the port via the
+// environment; a hardcoded value fails to bind there.
+const PORT = Number(process.env.PORT) || 3000;
 
 async function start() {
   const app = await createApp();

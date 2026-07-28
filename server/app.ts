@@ -60,8 +60,27 @@ export async function createApp() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+
+    app.use(
+      express.static(distPath, {
+        setHeaders: (res, filePath) => {
+          const base = path.basename(filePath);
+          // The service worker and manifest must never be served from cache:
+          // a stale sw.js pins users to an old build indefinitely, because the
+          // browser checks this exact URL to discover updates.
+          if (base === 'sw.js' || base === 'manifest.webmanifest') {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          }
+        },
+      })
+    );
+
+    // SPA fallback. Restricted to navigations so a missing asset returns 404
+    // instead of HTML — a JS or JSON request answered with index.html surfaces
+    // as a confusing parse error rather than a clear missing-file error.
+    app.get('*', (req, res, next) => {
+      if (req.method !== 'GET' || !req.accepts('html')) return next();
+      if (path.extname(req.path)) return next();
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
