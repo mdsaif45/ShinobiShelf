@@ -18,17 +18,9 @@ export default function BookDetailsModal({ book, open, onOpenChange, onBorrowCli
   const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState<any>(null);
 
-  // Reviews State
-  const [reviews, setReviews] = useState<any[]>([
-    {
-      id: 'rev-1',
-      bookId: book?.id,
-      userName: 'Sarah Jenkins',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250',
-      rating: 5,
-      text: 'An outstanding read! Passed it on in wonderful condition.',
-    }
-  ]);
+  // Reviews State. Seeded empty: a placeholder review here was shown on every
+  // book, including ones added seconds earlier, reading as a real review.
+  const [reviews, setReviews] = useState<any[]>([]);
   const [rating, setRating] = useState<number>(5);
   const [reviewText, setReviewText] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);

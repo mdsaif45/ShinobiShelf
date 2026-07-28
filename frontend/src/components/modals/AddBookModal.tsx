@@ -11,6 +11,31 @@ interface OpenLibraryBook {
   author_name?: string[];
   isbn?: string[];
   cover_i?: number;
+  subject?: string[];
+}
+
+/**
+ * Map Open Library's free-form subjects onto the catalogue's genre options.
+ *
+ * The catalogue filter compares genres by exact equality, so a value outside
+ * this list (previously always the repository default "General") can never be
+ * matched by any filter. Order matters: the first hit wins, so the more
+ * specific subjects are checked before the broad "fiction" catch-all.
+ */
+const GENRE_KEYWORDS: Array<[string, string[]]> = [
+  ['Philosophy', ['philosophy', 'philosophical', 'ethics', 'metaphysics']],
+  ['Biography', ['biography', 'autobiography', 'memoir', 'biographies']],
+  ['Non-Fiction', ['history', 'science', 'nonfiction', 'non-fiction', 'politics', 'economics', 'psychology']],
+  ['Fiction', ['fiction', 'novel', 'fantasy', 'science fiction', 'mystery', 'fiction in english']],
+];
+
+function deriveGenre(subjects?: string[]): string | undefined {
+  if (!subjects?.length) return undefined;
+  const haystack = subjects.slice(0, 40).join(' | ').toLowerCase();
+  for (const [genre, keywords] of GENRE_KEYWORDS) {
+    if (keywords.some((k) => haystack.includes(k))) return genre;
+  }
+  return undefined;
 }
 
 export default function AddBookModal({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
@@ -18,6 +43,7 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
   const [results, setResults] = useState<OpenLibraryBook[]>([]);
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -35,7 +61,12 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
   const performSearch = async (searchQuery: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(searchQuery)}&limit=10`);
+      // `fields` keeps the payload small while still returning the subjects
+      // used to derive a genre.
+      const response = await fetch(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(searchQuery)}&limit=10` +
+          `&fields=key,title,author_name,isbn,cover_i,subject`
+      );
       const data = await response.json();
       setResults(data.docs || []);
     } catch (error) {
@@ -47,7 +78,12 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
 
   const searchBooks = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      // Previously a silent no-op, which read as a broken button.
+      setSearchError('Enter a title, author or ISBN to search.');
+      return;
+    }
+    setSearchError('');
     performSearch(query);
   };
 
@@ -60,11 +96,14 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
     try {
       const coverUrl = book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg` : '';
       
+      const genre = deriveGenre(book.subject);
+
       await addBook({
         title: book.title,
         author: book.author_name ? book.author_name[0] : 'Unknown Author',
         isbn: book.isbn ? book.isbn[0] : '',
         coverUrl,
+        ...(genre ? { genre } : {}),
         ownerId: user.id,
         owner: {
           name: user.displayName || user.email?.split('@')[0] || 'Unknown',
@@ -97,14 +136,21 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
               type="text" 
               placeholder="Search by title, author, or ISBN..." 
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (searchError) setSearchError('');
+              }}
               className="w-full pl-9 pr-4 py-2 bg-white border border-[#E5E0D8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#4B5320] transition-all shadow-sm"
             />
           </div>
-          <Button type="submit" disabled={loading || !query.trim()} className="bg-[#4B5320] text-white hover:bg-[#3D441A] rounded-xl">
+          <Button type="submit" disabled={loading} className="bg-[#4B5320] text-white hover:bg-[#3D441A] rounded-xl">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
           </Button>
         </form>
+
+        {searchError && (
+          <p className="mt-2 text-xs font-medium text-red-500">{searchError}</p>
+        )}
 
         <div className="mt-6 max-h-[60vh] overflow-y-auto space-y-4 pr-2">
           {results.map((book) => (

@@ -3,13 +3,26 @@ import { Book } from '../../../frontend/src/types';
 import { dbGet, dbQuery, dbRun } from '../../config/sqlite';
 
 export class SqliteBookRepository implements IBookRepository {
+  // Books are always read with their owner's display name joined in, so the
+  // UI can name the owner instead of falling back to a literal "Owner".
+  private static readonly SELECT_WITH_OWNER = `
+    SELECT b.*, u.display_name AS owner_name, u.photo_url AS owner_photo_url
+    FROM books b
+    LEFT JOIN users u ON u.id = b.owner_id
+  `;
+
   async findAll(): Promise<Book[]> {
-    const rows = await dbQuery<any>('SELECT * FROM books ORDER BY created_at DESC');
+    const rows = await dbQuery<any>(
+      `${SqliteBookRepository.SELECT_WITH_OWNER} ORDER BY b.created_at DESC`
+    );
     return rows.map(r => this.mapToBook(r));
   }
 
   async findById(id: string): Promise<Book | null> {
-    const row = await dbGet<any>('SELECT * FROM books WHERE id = ?', [id]);
+    const row = await dbGet<any>(
+      `${SqliteBookRepository.SELECT_WITH_OWNER} WHERE b.id = ?`,
+      [id]
+    );
     if (!row) return null;
     return this.mapToBook(row);
   }
@@ -78,6 +91,15 @@ export class SqliteBookRepository implements IBookRepository {
       genre: row.genre,
       isbn: row.isbn,
       ownerId: row.owner_id,
+      // Present whenever the row came from a query that joined users.
+      owner: row.owner_id
+        ? {
+            id: row.owner_id,
+            uid: row.owner_id,
+            name: row.owner_name || undefined,
+            avatar: row.owner_photo_url || undefined,
+          }
+        : undefined,
       status: row.status,
       progress: row.progress,
       currentReader: row.current_reader_id ? { uid: row.current_reader_id } : null,
