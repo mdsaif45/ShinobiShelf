@@ -41,8 +41,11 @@ export class BookController {
 
   deleteBook = async (req: AuthRequest, res: Response, next: any) => {
     try {
+      const callerId = req.dbUser?.id || req.user?.uid;
+      if (!callerId) return res.status(401).json({ error: 'Unauthorized' });
+
       const { id } = req.params;
-      await this.bookService.deleteBook(id);
+      await this.bookService.deleteBook(id, callerId);
       res.json({ success: true });
     } catch (err) {
       next(err);

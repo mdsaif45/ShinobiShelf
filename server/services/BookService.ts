@@ -29,7 +29,21 @@ export class BookService {
     return await this.bookRepo.update(id, updates);
   }
 
-  async deleteBook(id: string): Promise<boolean> {
+  /**
+   * Delete a book, which only its owner may do.
+   *
+   * The check lives here rather than in the UI: hiding a delete control does
+   * not stop a direct API call, and previously any authenticated user could
+   * delete any other user's book.
+   */
+  async deleteBook(id: string, callerId: string): Promise<boolean> {
+    const book = await this.bookRepo.findById(id);
+    if (!book) {
+      throw Object.assign(new Error('Book not found'), { status: 404 });
+    }
+    if (book.ownerId !== callerId) {
+      throw Object.assign(new Error('Only the owner can delete this book'), { status: 403 });
+    }
     return await this.bookRepo.delete(id);
   }
 }
