@@ -1,27 +1,14 @@
 import { UserProfile } from '../types';
+import { subscribePolled } from './poll';
 
-export const subscribeToUsers = (callback: (users: UserProfile[]) => void) => {
-  let active = true;
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch('/api/users');
-      if (res.ok) {
-        const users = await res.json();
-        if (active) callback(users);
-      }
-    } catch (e) {
-      console.warn('Error fetching users:', e);
-    }
-  };
-
-  fetchUsers();
-  const interval = setInterval(fetchUsers, 5000);
-
-  return () => {
-    active = false;
-    clearInterval(interval);
-  };
+const fetchUsers = async (): Promise<UserProfile[]> => {
+  const res = await fetch('/api/users');
+  if (!res.ok) throw new Error(`GET /api/users failed: ${res.status}`);
+  return res.json();
 };
+
+export const subscribeToUsers = (callback: (users: UserProfile[]) => void) =>
+  subscribePolled('users', fetchUsers, callback);
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
