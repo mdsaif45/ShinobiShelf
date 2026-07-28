@@ -129,6 +129,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const loginWithGoogle = async () => {
+    // Set once the real Google identity has been exchanged for a session.
+    // Any later fallback must not run, or it would overwrite that session
+    // with a different (throwaway) account.
+    let signedIn = false;
     try {
       // 1. Try Firebase Auth popup first
       try {
@@ -151,9 +155,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           localStorage.setItem('authToken', data.token);
           setToken(data.token);
           setUser(data.user);
+          signedIn = true;
           return;
         }
       } catch (fbErr: any) {
+        // The popup already produced a session; a failure after that point
+        // (e.g. while reading the profile) must not fall through to a
+        // fallback that would replace the real account.
+        if (signedIn) return;
         console.warn('Firebase popup sign in warning:', fbErr?.code || fbErr?.message);
         // The user aborted deliberately: not an error worth surfacing.
         if (
@@ -217,9 +226,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
 
-      // 3. Fallback: Local Google Authentication
+      // 3. Fallback: Local Google Authentication.
+      // Only reachable when the popup never produced a session.
+      if (signedIn) return;
       await handleGoogleCallback();
     } catch (err: any) {
+      if (signedIn) return;
       console.error('Google auth failed:', err);
       // Only fall back to the local stub account when no real Google
       // credentials are configured (local dev without GOOGLE_CLIENT_ID).
