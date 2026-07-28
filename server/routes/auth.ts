@@ -176,9 +176,14 @@ router.post('/google', async (req: Request, res: Response) => {
       }
     }
 
+    // Never fabricate an identity. Doing so silently discards the real Google
+    // account and signs the user into a throwaway one instead.
     if (!userEmail) {
-      // Fallback for simulation / mock Google OAuth popup test mode
-      userEmail = `google_user_${crypto.randomBytes(4).toString('hex')}@gmail.com`;
+      res.status(400).json({
+        error:
+          'Google sign-in did not return an email address. Please try again.',
+      });
+      return;
     }
     if (!userName) {
       userName = userEmail.split('@')[0];
