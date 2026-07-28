@@ -179,8 +179,12 @@ export default function WishlistBoardTab({ onAddBookToCatalog }: WishlistBoardTa
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {requests.map((reqItem: any) => {
             const upvotesCount = reqItem.upvotes?.length || 0;
-            const hasUpvoted = reqItem.upvotes?.includes(user?.uid);
-            const isRequester = user?.uid === reqItem.requesterId;
+            // AuthUser exposes `id`, not `uid`. Comparing against `user?.uid`
+            // was always undefined, so isRequester never became true and the
+            // self-lend guard below never applied.
+            const currentUserId = user?.id;
+            const hasUpvoted = !!currentUserId && reqItem.upvotes?.includes(currentUserId);
+            const isRequester = !!currentUserId && currentUserId === reqItem.requesterId;
             const offersCount = reqItem.offers?.length || 0;
 
             return (
