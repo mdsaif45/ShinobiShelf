@@ -1,27 +1,14 @@
 import { Book } from '../types';
+import { subscribePolled } from './poll';
 
-export const subscribeToBooks = (callback: (books: Book[]) => void) => {
-  let active = true;
-  const fetchBooks = async () => {
-    try {
-      const res = await fetch('/api/books');
-      if (res.ok) {
-        const books = await res.json();
-        if (active) callback(books);
-      }
-    } catch (e) {
-      console.warn('Error fetching books:', e);
-    }
-  };
-
-  fetchBooks();
-  const interval = setInterval(fetchBooks, 3000);
-
-  return () => {
-    active = false;
-    clearInterval(interval);
-  };
+const fetchBooks = async (): Promise<Book[]> => {
+  const res = await fetch('/api/books');
+  if (!res.ok) throw new Error(`GET /api/books failed: ${res.status}`);
+  return res.json();
 };
+
+export const subscribeToBooks = (callback: (books: Book[]) => void) =>
+  subscribePolled('books', fetchBooks, callback);
 
 export const addBook = async (bookData: Partial<Book>) => {
   const token = localStorage.getItem('authToken');

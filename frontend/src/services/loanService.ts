@@ -1,27 +1,14 @@
 import { BorrowRequest } from '../types';
+import { subscribePolled } from './poll';
 
-export const subscribeToBorrowRequests = (callback: (requests: BorrowRequest[]) => void) => {
-  let active = true;
-  const fetchLoans = async () => {
-    try {
-      const res = await fetch('/api/loans');
-      if (res.ok) {
-        const requests = await res.json();
-        if (active) callback(requests);
-      }
-    } catch (e) {
-      console.warn('Error fetching borrow requests:', e);
-    }
-  };
-
-  fetchLoans();
-  const interval = setInterval(fetchLoans, 3000);
-
-  return () => {
-    active = false;
-    clearInterval(interval);
-  };
+const fetchLoans = async (): Promise<BorrowRequest[]> => {
+  const res = await fetch('/api/loans');
+  if (!res.ok) throw new Error(`GET /api/loans failed: ${res.status}`);
+  return res.json();
 };
+
+export const subscribeToBorrowRequests = (callback: (requests: BorrowRequest[]) => void) =>
+  subscribePolled('loans', fetchLoans, callback);
 
 export const createBorrowRequest = async (data: Partial<BorrowRequest>) => {
   const token = localStorage.getItem('authToken');
