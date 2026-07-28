@@ -32,6 +32,24 @@ export class LoanController {
     }
   };
 
+  updateStatus = async (req: AuthRequest, res: Response, next: any) => {
+    try {
+      const callerId = req.dbUser?.id || req.user?.uid;
+      if (!callerId) return res.status(401).json({ error: 'Unauthorized' });
+
+      const { status, ...updates } = req.body;
+      const updated = await this.loanService.updateStatus(
+        req.params.id,
+        status,
+        updates,
+        callerId
+      );
+      res.json(updated);
+    } catch (err) {
+      next(err);
+    }
+  };
+
   verifyHandshake = async (req: AuthRequest, res: Response, next: any) => {
     try {
       const { loanId, passcode } = req.body;
