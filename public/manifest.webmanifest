@@ -1,0 +1,49 @@
+{
+  "name": "Circle — Community Book Sharing",
+  "short_name": "Circle",
+  "description": "Peer-to-peer community book sharing: lend, borrow, track loans, build reading circles.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#4B5320",
+  "background_color": "#F5F2ED",
+  "categories": [
+    "books",
+    "social",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My Books",
+      "url": "/library",
+      "description": "Your shared shelf"
+    },
+    {
+      "name": "Profile",
+      "url": "/profile",
+      "description": "Your reader profile"
+    }
+  ]
+}

@@ -9,6 +9,16 @@
       name="description"
       content="Peer-to-peer community book sharing: lend, borrow, track loans, build reading circles."
     />
+
+    <!-- PWA: the manifest is what makes the app installable. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#4B5320" />
+
+    <!-- iOS ignores the manifest for these, so they are declared explicitly. -->
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Circle" />
   </head>
   <body>
     <div id="root"></div>

@@ -5,6 +5,8 @@ import OnboardingPage from './pages/OnboardingPage';
 import LibraryPage from './pages/LibraryPage';
 import ProfilePage from './pages/ProfilePage';
 import { AuthProvider, useAuth } from './providers/AuthProvider';
+import { InstallPrompt } from './components/pwa/InstallPrompt';
+import { UpdateBanner } from './components/pwa/UpdateBanner';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -31,6 +33,9 @@ export default function App() {
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </Router>
+      {/* Outside Router: both are route-independent overlays. */}
+      <UpdateBanner />
+      <InstallPrompt />
     </AuthProvider>
   );
 }
