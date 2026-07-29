@@ -22,12 +22,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '../../providers/AuthProvider';
-import { subscribeToBorrowRequests, updateBorrowRequestStatus, awardHonestyPoints } from '../../services/loanService';
-import { updateBook } from '../../services/bookService';
+import { useToast } from '../../providers/ToastProvider';
+import { subscribeToBorrowRequests, updateBorrowRequestStatus } from '../../services/loanService';
 import { BorrowRequest } from '../../types';
 
 export default function LoansCalendarTab() {
   const { user } = useAuth();
+  const { notify, notifyError } = useToast();
   const [borrowedLoans, setBorrowedLoans] = useState<any[]>([]);
   const [lentLoans, setLentLoans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,12 @@ export default function LoansCalendarTab() {
   const [selectedLoanForReturn, setSelectedLoanForReturn] = useState<any>(null);
   const [returning, setReturning] = useState(false);
   const [returnResult, setReturnResult] = useState<{ onTime: boolean; pointsDelta: number } | null>(null);
+
+  // Which loan has an approve/decline request in flight, so its buttons can
+  // disable and show progress instead of appearing inert.
+  const [pendingLoanId, setPendingLoanId] = useState<string | null>(null);
+  // Set while a decline awaits confirmation.
+  const [loanToDecline, setLoanToDecline] = useState<any>(null);
 
   // User Honesty Score State
   const [userHonestyScore, setUserHonestyScore] = useState<number>(user?.honestyScore || 100);
@@ -96,37 +103,43 @@ export default function LoansCalendarTab() {
     });
   };
 
-  // Actions for Approval/Rejection
+  // Actions for Approval/Rejection.
+  //
+  // The book's own status and currentReader are set server-side inside the
+  // status transition, so the extra updateBook call these handlers used to make
+  // is gone: it duplicated the write and could race with it.
   const handleApproveLoan = async (loan: any) => {
+    setPendingLoanId(loan.id);
     try {
       await updateBorrowRequestStatus(loan.id, 'APPROVED');
-      if (loan.bookId) {
-        await updateBook(loan.bookId, {
-          status: 'BORROWED',
-          currentReader: {
-            uid: loan.borrowerId,
-            name: loan.borrowerName,
-            dueDate: loan.dueDate
-          },
-          progress: 0
-        });
-      }
-    } catch (err) {
+      notify(`Approved — ${loan.bookTitle} is now on loan to ${loan.borrowerName || 'the borrower'}.`);
+    } catch (err: any) {
       console.error('Error approving loan:', err);
+      notifyError(err?.message || 'Could not approve that request. Please try again.');
+    } finally {
+      setPendingLoanId(null);
     }
   };
 
+  /** Declining is not reversible for the borrower, so it asks first. */
   const handleDeclineLoan = async (loan: any) => {
+    setLoanToDecline(loan);
+  };
+
+  const confirmDeclineLoan = async () => {
+    const loan = loanToDecline;
+    if (!loan) return;
+
+    setPendingLoanId(loan.id);
     try {
       await updateBorrowRequestStatus(loan.id, 'REJECTED');
-      if (loan.bookId) {
-        await updateBook(loan.bookId, {
-          status: 'AVAILABLE',
-          pendingBorrower: undefined
-        });
-      }
-    } catch (err) {
+      notify(`Declined the request for ${loan.bookTitle}.`);
+      setLoanToDecline(null);
+    } catch (err: any) {
       console.error('Error declining loan:', err);
+      notifyError(err?.message || 'Could not decline that request. Please try again.');
+    } finally {
+      setPendingLoanId(null);
     }
   };
 
@@ -140,26 +153,23 @@ export default function LoansCalendarTab() {
       const isTodayOnTime = todayISO <= selectedLoanForReturn.dueDate;
       const pointsDelta = isTodayOnTime ? 10 : -5;
 
+      // The book's availability and the honesty adjustment are both applied
+      // server-side within this transition, so neither is repeated here.
       await updateBorrowRequestStatus(selectedLoanForReturn.id, 'RETURNED', {
-        returnedAt: new Date().toISOString(),
-        returnedOnTime: isTodayOnTime
+        returnedOnTime: isTodayOnTime,
       });
 
-      if (selectedLoanForReturn.bookId) {
-        await updateBook(selectedLoanForReturn.bookId, {
-          status: 'AVAILABLE',
-          currentReader: undefined,
-          pendingBorrower: undefined,
-          progress: 100
-        });
-      }
-
-      await awardHonestyPoints(user.id, pointsDelta);
-      setUserHonestyScore(prev => prev + pointsDelta);
-
+      setUserHonestyScore(prev => Math.max(0, prev + pointsDelta));
       setReturnResult({ onTime: isTodayOnTime, pointsDelta });
-    } catch (err) {
+      notify(
+        isTodayOnTime
+          ? `Returned on time — ${pointsDelta > 0 ? `+${pointsDelta}` : pointsDelta} honesty points.`
+          : `Returned late — ${pointsDelta} honesty points.`
+      );
+    } catch (err: any) {
       console.error('Error returning book:', err);
+      notifyError(err?.message || 'Could not complete the return. Please try again.');
+      // Leaves the dialog open on failure so the action can be retried.
     } finally {
       setReturning(false);
     }
@@ -296,11 +306,30 @@ export default function LoansCalendarTab() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <Button size="sm" onClick={() => handleDeclineLoan(req)} variant="outline" className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 text-xs">
+                      <Button
+                        size="sm"
+                        onClick={() => handleDeclineLoan(req)}
+                        disabled={pendingLoanId === req.id}
+                        variant="outline"
+                        className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 text-xs disabled:opacity-50"
+                      >
                         <X className="w-3.5 h-3.5 mr-1" /> Decline
                       </Button>
-                      <Button size="sm" onClick={() => handleApproveLoan(req)} className="rounded-xl bg-[#4B5320] text-white hover:bg-[#3D441A] text-xs">
-                        <Check className="w-3.5 h-3.5 mr-1" /> Approve
+                      <Button
+                        size="sm"
+                        onClick={() => handleApproveLoan(req)}
+                        disabled={pendingLoanId === req.id}
+                        className="rounded-xl bg-[#4B5320] text-white hover:bg-[#3D441A] text-xs disabled:opacity-50"
+                      >
+                        {pendingLoanId === req.id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Approving…
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5 mr-1" /> Approve
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -439,6 +468,47 @@ export default function LoansCalendarTab() {
 
         </div>
       </div>
+
+      {/* Decline Confirmation. Declining cannot be undone by the owner and the
+          borrower is not notified elsewhere, so it asks before committing. */}
+      <Dialog open={!!loanToDecline} onOpenChange={(open) => !open && setLoanToDecline(null)}>
+        <DialogContent className="sm:max-w-md bg-white rounded-3xl p-6 font-sans border-[#E5E0D8]">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl text-[#2C2C2C]">
+              Decline this request?
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="mt-2 text-sm text-[#8C867E]">
+            {loanToDecline?.borrowerName || 'The borrower'} asked to borrow{' '}
+            <strong className="text-[#2C2C2C]">{loanToDecline?.bookTitle}</strong>. They will see
+            the request as declined, and your book stays available to others.
+          </p>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setLoanToDecline(null)}
+              className="rounded-xl border-[#E5E0D8] text-xs"
+            >
+              Keep request
+            </Button>
+            <Button
+              onClick={confirmDeclineLoan}
+              disabled={!!pendingLoanId}
+              className="rounded-xl bg-red-600 text-white hover:bg-red-700 text-xs disabled:opacity-50"
+            >
+              {pendingLoanId ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> Declining…
+                </>
+              ) : (
+                'Decline request'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Return Confirmation Dialog */}
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>

@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '../../providers/AuthProvider';
+import { useToast } from '../../providers/ToastProvider';
 import { BookClub, ClubPost } from '../../types';
 import { 
   subscribeToBookClubs, 
@@ -28,6 +29,7 @@ import {
 
 export default function BookClubsTab() {
   const { user } = useAuth();
+  const { notify, notifyError } = useToast();
   const [clubs, setClubs] = useState<BookClub[]>([]);
   const [posts, setPosts] = useState<ClubPost[]>([]);
   const [selectedClubId, setSelectedClubId] = useState<string>('all');
@@ -78,13 +80,16 @@ export default function BookClubsTab() {
         creatorName: user.displayName || user.email?.split('@')[0] || 'Member',
       });
 
+      const created = clubName.trim();
       setClubName('');
       setClubDesc('');
       setClubCurrentBook('');
       setClubMeetupDate('');
       setIsClubModalOpen(false);
-    } catch (err) {
+      notify(`Created ${created}. You're the first member.`);
+    } catch (err: any) {
       console.error('Error creating club:', err);
+      notifyError(err?.message || 'Could not create that club. Please try again.');
     } finally {
       setCreatingClub(false);
     }
@@ -95,9 +100,11 @@ export default function BookClubsTab() {
     const isMember = club.members?.includes(user.id);
 
     try {
-      await toggleClubMembership(club.id, user.id, !!isMember);
-    } catch (err) {
+      await toggleClubMembership(club.id);
+      notify(isMember ? `Left ${club.name}.` : `Joined ${club.name}.`);
+    } catch (err: any) {
       console.error('Error joining club:', err);
+      notifyError(err?.message || 'Could not update your membership.');
     }
   };
 
@@ -107,21 +114,20 @@ export default function BookClubsTab() {
 
     setCreatingPost(true);
     try {
+      // Author identity and the initial (empty) like/comment lists come from
+      // the server, so they are no longer sent from here.
       await createClubPost({
         content: postContent.trim(),
         bookTitle: postBookTitle.trim() || '',
         clubId: selectedClubId === 'all' ? 'general' : selectedClubId,
-        authorId: user.id,
-        authorName: user.displayName || user.email?.split('@')[0] || 'Reader',
-        authorAvatar: user.photoURL || '',
-        likes: [user.id],
-        comments: [],
       });
 
       setPostContent('');
       setPostBookTitle('');
-    } catch (err) {
+      notify('Posted to the discussion.');
+    } catch (err: any) {
       console.error('Error creating post:', err);
+      notifyError(err?.message || 'Could not post that. Please try again.');
     } finally {
       setCreatingPost(false);
     }
@@ -129,12 +135,12 @@ export default function BookClubsTab() {
 
   const handleToggleLike = async (post: ClubPost) => {
     if (!user) return;
-    const hasLiked = post.likes?.includes(user.id);
 
     try {
-      await togglePostLike(post.id, user.id, !!hasLiked);
-    } catch (err) {
+      await togglePostLike(post.id);
+    } catch (err: any) {
       console.error('Error liking post:', err);
+      notifyError(err?.message || 'Could not record that like.');
     }
   };
 
@@ -143,19 +149,13 @@ export default function BookClubsTab() {
     const text = commentInputs[postId]?.trim();
     if (!text) return;
 
-    const commentObj = {
-      authorId: user.id,
-      authorName: user.displayName || user.email?.split('@')[0] || 'Reader',
-      authorAvatar: user.photoURL || '',
-      text,
-      createdAt: new Date().toISOString()
-    };
-
     try {
-      await addPostComment(postId, commentObj);
+      // Only the text is sent; the server attributes the comment to the caller.
+      await addPostComment(postId, { text });
       setCommentInputs(prev => ({ ...prev, [postId]: '' }));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding comment:', err);
+      notifyError(err?.message || 'Could not add that comment.');
     }
   };
 

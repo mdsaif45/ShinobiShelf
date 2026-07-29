@@ -3,8 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/Button';
 import { Calendar, Clock, AlertCircle, CheckCircle2, ShieldCheck, HeartHandshake, Loader2 } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider';
+import { useToast } from '../../providers/ToastProvider';
 import { createBorrowRequest } from '../../services/loanService';
-import { updateBook } from '../../services/bookService';
 
 interface BorrowRequestModalProps {
   book: any;
@@ -15,6 +15,7 @@ interface BorrowRequestModalProps {
 
 export default function BorrowRequestModal({ book, open, onOpenChange, onRequestSubmitted }: BorrowRequestModalProps) {
   const { user } = useAuth();
+  const { notify } = useToast();
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 
@@ -77,16 +78,12 @@ export default function BorrowRequestModal({ book, open, onOpenChange, onRequest
         status: 'PENDING'
       });
 
-      await updateBook(book.id, {
-        pendingBorrower: {
-          uid: user.id,
-          name: user.displayName || user.email?.split('@')[0] || 'Borrower',
-          startDate,
-          dueDate
-        }
-      });
+      // No updateBook here: the request itself records the borrower, and the
+      // server owns the book's status. Writing it from the client duplicated
+      // that and could race with the server's own update.
 
       setSuccessMsg(true);
+      notify(`Request sent to ${book.owner?.name || 'the owner'} for ${book.title}.`);
       setTimeout(() => {
         setSuccessMsg(false);
         onOpenChange(false);
