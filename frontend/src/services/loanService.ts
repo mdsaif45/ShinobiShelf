@@ -1,26 +1,16 @@
 import { BorrowRequest } from '../types';
-import { subscribePolled } from './poll';
+import { subscribePolled, refreshPolled } from './poll';
+import { getJson, sendJson } from './http';
 
-const fetchLoans = async (): Promise<BorrowRequest[]> => {
-  const res = await fetch('/api/loans');
-  if (!res.ok) throw new Error(`GET /api/loans failed: ${res.status}`);
-  return res.json();
-};
+const fetchLoans = (): Promise<BorrowRequest[]> => getJson<BorrowRequest[]>('/api/loans');
 
 export const subscribeToBorrowRequests = (callback: (requests: BorrowRequest[]) => void) =>
   subscribePolled('loans', fetchLoans, callback);
 
 export const createBorrowRequest = async (data: Partial<BorrowRequest>) => {
-  const token = localStorage.getItem('authToken');
-  const res = await fetch('/api/loans', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(data),
-  });
-  return await res.json();
+  const created = await sendJson<BorrowRequest>('/api/loans', 'POST', data);
+  refreshPolled('loans');
+  return created;
 };
 
 export const updateBorrowRequestStatus = async (
@@ -28,16 +18,14 @@ export const updateBorrowRequestStatus = async (
   status: BorrowRequest['status'],
   additionalFields: Partial<BorrowRequest> = {}
 ) => {
-  const token = localStorage.getItem('authToken');
-  const res = await fetch(`/api/loans/${requestId}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ status, ...additionalFields }),
+  const updated = await sendJson<BorrowRequest>(`/api/loans/${requestId}/status`, 'PATCH', {
+    status,
+    ...additionalFields,
   });
-  return await res.json();
+  // A status change alters book availability too, so both polls refresh.
+  refreshPolled('loans');
+  refreshPolled('books');
+  return updated;
 };
 
 /**

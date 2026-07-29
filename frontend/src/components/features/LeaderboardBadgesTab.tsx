@@ -33,7 +33,23 @@ export default function LeaderboardBadgesTab() {
     return () => unsubscribe();
   }, []);
 
-  // System Badge Definitions
+  // Badges are derived from the signed-in user's real stats.
+  //
+  // These were previously hardcoded `unlocked: true`, so four of six showed as
+  // earned for every account regardless of activity — a brand-new user appeared
+  // to have returned five books on time and lent out three. Showing an
+  // unearned trust badge misrepresents the thing the honesty system exists to
+  // communicate, so each criterion is now evaluated.
+  //
+  // Two badges depend on data the backend does not track yet (stored reviews
+  // and per-loan reading progress). They are declared with `available: false`
+  // and rendered as "coming soon" rather than as achievable-but-locked, so the
+  // UI never implies progress it cannot measure.
+  const myProfile = usersList.find((u) => u.id === user?.id);
+  const honesty = myProfile?.honestyScore ?? 100;
+  const lent = myProfile?.booksLentCount ?? 0;
+  const borrowed = myProfile?.booksBorrowedCount ?? 0;
+
   const systemBadges = [
     {
       id: 'punctual_scholar',
@@ -41,7 +57,8 @@ export default function LeaderboardBadgesTab() {
       description: 'Returned 5+ borrowed books on or before due date.',
       icon: '🛡️',
       color: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-      unlocked: true
+      available: true,
+      unlocked: borrowed >= 5 && honesty >= 100,
     },
     {
       id: 'master_lender',
@@ -49,7 +66,8 @@ export default function LeaderboardBadgesTab() {
       description: 'Shared 3 or more books to the circle shelf.',
       icon: '📚',
       color: 'bg-amber-50 text-amber-800 border-amber-200',
-      unlocked: true
+      available: true,
+      unlocked: lent >= 3,
     },
     {
       id: 'circle_pioneer',
@@ -57,7 +75,9 @@ export default function LeaderboardBadgesTab() {
       description: 'Early founding member of the neighborhood library.',
       icon: '🌟',
       color: 'bg-purple-50 text-purple-800 border-purple-200',
-      unlocked: true
+      available: true,
+      // Among the first twenty accounts, by join order.
+      unlocked: usersList.length > 0 && usersList.findIndex((u) => u.id === user?.id) < 20,
     },
     {
       id: 'trusted_bibliophile',
@@ -65,7 +85,8 @@ export default function LeaderboardBadgesTab() {
       description: 'Achieved High Trust Status with 120+ Honesty Points.',
       icon: '💎',
       color: 'bg-blue-50 text-blue-800 border-blue-200',
-      unlocked: false
+      available: true,
+      unlocked: honesty >= 120,
     },
     {
       id: 'community_critic',
@@ -73,7 +94,9 @@ export default function LeaderboardBadgesTab() {
       description: 'Published 3+ insightful star reviews for fellow readers.',
       icon: '✍️',
       color: 'bg-rose-50 text-rose-800 border-rose-200',
-      unlocked: true
+      // Reviews are not persisted anywhere yet, so this cannot be earned.
+      available: false,
+      unlocked: false,
     },
     {
       id: 'marathon_reader',
@@ -81,8 +104,10 @@ export default function LeaderboardBadgesTab() {
       description: 'Completed 100% reading progress on 5 active loans.',
       icon: '🔥',
       color: 'bg-orange-50 text-orange-800 border-orange-200',
-      unlocked: false
-    }
+      // Per-loan reading progress is not tracked yet.
+      available: false,
+      unlocked: false,
+    },
   ];
 
   return (
@@ -246,9 +271,14 @@ export default function LeaderboardBadgesTab() {
                 >
                   <span className="text-2xl shrink-0 mt-0.5">{badge.icon}</span>
                   <div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <h4 className="font-bold text-xs">{badge.title}</h4>
                       {badge.unlocked && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                      {!badge.available && (
+                        <span className="text-[9px] font-semibold uppercase tracking-wide text-neutral-400 border border-neutral-300 rounded-full px-1.5 py-0.5">
+                          Coming soon
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] leading-tight mt-0.5">{badge.description}</p>
                   </div>

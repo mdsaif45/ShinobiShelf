@@ -148,6 +148,28 @@ export class SqliteUserRepository implements IUserRepository {
     return newScore;
   }
 
+  // Guarded with COALESCE because these columns can be null on rows created
+  // before they had defaults.
+  async incrementBorrowedCount(userId: string): Promise<void> {
+    await dbRun(
+      `UPDATE users
+         SET books_borrowed_count = COALESCE(books_borrowed_count, 0) + 1,
+             updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [userId]
+    );
+  }
+
+  async incrementLentCount(userId: string): Promise<void> {
+    await dbRun(
+      `UPDATE users
+         SET books_lent_count = COALESCE(books_lent_count, 0) + 1,
+             updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [userId]
+    );
+  }
+
   async findAll(): Promise<UserProfile[]> {
     const rows = await dbQuery<any>('SELECT * FROM users ORDER BY honesty_score DESC');
     return rows.map(r => this.mapToUserProfile(r));

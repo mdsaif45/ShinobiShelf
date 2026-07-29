@@ -86,6 +86,20 @@ function bindVisibility() {
 }
 
 /**
+ * Refetch a polled endpoint immediately, out of band.
+ *
+ * Called after a mutation so the change appears without waiting out the poll
+ * interval — previously a newly added book did not show up until a manual
+ * reload, which read as a silent failure.
+ *
+ * A no-op when nothing is subscribed to the key.
+ */
+export function refreshPolled(key: string): void {
+  const group = groups.get(key);
+  if (group) tick(group);
+}
+
+/**
  * Subscribe to a polled endpoint. Returns an unsubscribe function; the shared
  * timer is torn down once the last subscriber leaves.
  */
