@@ -11,7 +11,11 @@ const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
 router.get('/me', requireAuth, userController.getCurrentUser);
-router.get('/', userController.getAllUsers);
+
+// Was reachable with no token at all, returning every user's email address,
+// notification preferences and favourite genres.
+router.get('/', requireAuth, userController.getAllUsers);
+
 router.patch('/:id', requireAuth, userController.updateUser);
 
 export default router;

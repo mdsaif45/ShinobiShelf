@@ -16,7 +16,9 @@ const userRepository = RepositoryFactory.getUserRepository();
 const loanService = new LoanService(loanRepository, bookRepository, userRepository);
 const loanController = new LoanController(loanService);
 
-router.get('/', loanController.getAllLoans);
+// Was reachable with no token, exposing every loan in the system along with
+// borrower and owner names and each loan's 4-digit handshake code.
+router.get('/', requireAuth, loanController.getAllLoans);
 
 // Creating a borrow request. POST / is the canonical path the client uses;
 // /request is kept as an alias so any existing caller keeps working.
