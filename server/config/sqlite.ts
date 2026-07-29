@@ -40,15 +40,29 @@ export async function getDb(): Promise<Database> {
   return dbInitPromise;
 }
 
-function initSqliteSchema(db: Database) {
+function initSqliteSchema(db: Database, { quiet = false }: { quiet?: boolean } = {}) {
   if (fs.existsSync(SCHEMA_PATH)) {
     const sql = fs.readFileSync(SCHEMA_PATH, "utf-8");
     db.run(sql);
-    console.log("✅ SQLite schema initialized successfully from schema.sql.");
+    if (!quiet) {
+      console.log("✅ SQLite schema initialized successfully from schema.sql.");
+    }
   }
 }
 
 function ensureMigrations(db: Database) {
+  try {
+    // Re-run the schema on every start. Every statement in schema.sql is
+    // CREATE TABLE / CREATE INDEX ... IF NOT EXISTS, so this is a no-op for
+    // tables that already exist and creates any that were added since the
+    // database file was first written. Without this, a new table only appears
+    // after deleting the database, because the column checks below cannot add
+    // whole tables.
+    initSqliteSchema(db, { quiet: true });
+  } catch (err) {
+    console.error("Schema sync error:", err);
+  }
+
   try {
     // Check if google_access_token column exists in users table
     const columns = db.exec("PRAGMA table_info(users)");
@@ -72,6 +86,24 @@ function ensureMigrations(db: Database) {
       }
       if (!colNames.includes("notification_preferences")) {
         db.run("ALTER TABLE users ADD COLUMN notification_preferences TEXT;");
+      }
+      // Was absent from this list, so a database predating the column left
+      // registration failing with "table users has no column named
+      // auth_provider".
+      if (!colNames.includes("auth_provider")) {
+        db.run("ALTER TABLE users ADD COLUMN auth_provider TEXT DEFAULT 'email';");
+      }
+      if (!colNames.includes("google_id")) {
+        db.run("ALTER TABLE users ADD COLUMN google_id TEXT;");
+      }
+      if (!colNames.includes("photo_url")) {
+        db.run("ALTER TABLE users ADD COLUMN photo_url TEXT;");
+      }
+      if (!colNames.includes("books_lent_count")) {
+        db.run("ALTER TABLE users ADD COLUMN books_lent_count INTEGER DEFAULT 0;");
+      }
+      if (!colNames.includes("books_borrowed_count")) {
+        db.run("ALTER TABLE users ADD COLUMN books_borrowed_count INTEGER DEFAULT 0;");
       }
     }
   } catch (err) {

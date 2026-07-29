@@ -73,8 +73,8 @@ export default function BookClubsTab() {
         description: clubDesc.trim(),
         currentBook: clubCurrentBook.trim() || 'To Be Decided',
         meetupDate: clubMeetupDate || 'TBD',
-        members: [user.uid],
-        creatorId: user.uid,
+        members: [user.id],
+        creatorId: user.id,
         creatorName: user.displayName || user.email?.split('@')[0] || 'Member',
       });
 
@@ -92,10 +92,10 @@ export default function BookClubsTab() {
 
   const handleToggleJoinClub = async (club: BookClub) => {
     if (!user) return;
-    const isMember = club.members?.includes(user.uid);
+    const isMember = club.members?.includes(user.id);
 
     try {
-      await toggleClubMembership(club.id, user.uid, !!isMember);
+      await toggleClubMembership(club.id, user.id, !!isMember);
     } catch (err) {
       console.error('Error joining club:', err);
     }
@@ -111,10 +111,10 @@ export default function BookClubsTab() {
         content: postContent.trim(),
         bookTitle: postBookTitle.trim() || '',
         clubId: selectedClubId === 'all' ? 'general' : selectedClubId,
-        authorId: user.uid,
+        authorId: user.id,
         authorName: user.displayName || user.email?.split('@')[0] || 'Reader',
         authorAvatar: user.photoURL || '',
-        likes: [user.uid],
+        likes: [user.id],
         comments: [],
       });
 
@@ -129,10 +129,10 @@ export default function BookClubsTab() {
 
   const handleToggleLike = async (post: ClubPost) => {
     if (!user) return;
-    const hasLiked = post.likes?.includes(user.uid);
+    const hasLiked = post.likes?.includes(user.id);
 
     try {
-      await togglePostLike(post.id, user.uid, !!hasLiked);
+      await togglePostLike(post.id, user.id, !!hasLiked);
     } catch (err) {
       console.error('Error liking post:', err);
     }
@@ -144,7 +144,7 @@ export default function BookClubsTab() {
     if (!text) return;
 
     const commentObj = {
-      authorId: user.uid,
+      authorId: user.id,
       authorName: user.displayName || user.email?.split('@')[0] || 'Reader',
       authorAvatar: user.photoURL || '',
       text,
@@ -199,7 +199,7 @@ export default function BookClubsTab() {
 
           <div className="space-y-3">
             {clubs.map((club) => {
-              const isMember = club.members?.includes(user?.uid);
+              const isMember = club.members?.includes(user?.id ?? "");
               const isSelected = selectedClubId === club.id;
 
               return (
@@ -296,7 +296,7 @@ export default function BookClubsTab() {
             ) : (
               filteredPosts.map((post) => {
                 const likesCount = post.likes?.length || 0;
-                const hasLiked = post.likes?.includes(user?.uid);
+                const hasLiked = post.likes?.includes(user?.id ?? "");
                 const comments = post.comments || [];
 
                 return (
