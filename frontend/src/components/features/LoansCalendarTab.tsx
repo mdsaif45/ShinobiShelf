@@ -169,6 +169,11 @@ export default function LoansCalendarTab() {
   const activeBorrows = borrowedLoans.filter(l => l.status !== 'REJECTED');
   const activeLends = lentLoans.filter(l => l.status === 'APPROVED');
 
+  // A declined request used to vanish from both parties' views: the borrower's
+  // list excluded REJECTED and the owner's showed only APPROVED, so neither
+  // side ever learned the outcome even though the backend stored it correctly.
+  const declinedForMe = borrowedLoans.filter(l => l.status === 'REJECTED');
+
   return (
     <div className="space-y-8 font-sans text-[#2C2C2C]">
       
@@ -401,6 +406,36 @@ export default function LoansCalendarTab() {
               </div>
             )}
           </Card>
+
+          {/* Declined requests. Shown only when there are any, so the borrower
+              learns the outcome instead of the request silently disappearing. */}
+          {declinedForMe.length > 0 && (
+            <Card className="bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-sm">
+              <h3 className="font-serif text-xl font-semibold text-[#2C2C2C] mb-4">
+                Declined Requests ({declinedForMe.length})
+              </h3>
+              <div className="space-y-3">
+                {declinedForMe.map(loan => (
+                  <div
+                    key={loan.id}
+                    className="p-3 bg-[#F9F7F4] border border-[#E5E0D8] rounded-2xl flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-serif font-semibold text-sm text-[#2C2C2C] truncate">
+                        {loan.bookTitle}
+                      </p>
+                      <p className="text-xs text-[#8C867E]">
+                        {loan.ownerName ? <>Declined by <strong>{loan.ownerName}</strong></> : 'Request declined'}
+                      </p>
+                    </div>
+                    <Badge className="bg-red-50 text-red-700 border-red-200 text-[10px] shrink-0">
+                      Declined
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
         </div>
       </div>
