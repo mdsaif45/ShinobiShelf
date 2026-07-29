@@ -44,8 +44,12 @@ const PRIMARY_TABS = [
   { id: 'wishlist', label: 'Wishlist', icon: Heart },
 ];
 
+// Swaps is gated: its pickup spots and events are sample content with no
+// backend, so the tab is hidden rather than shown full of data that is not real.
 const SECONDARY_TABS = [
-  { id: 'swaps', label: 'Swaps', icon: MapPin, desc: 'PIN handoffs, local pickup spots & events' },
+  ...(FEATURES.swaps
+    ? [{ id: 'swaps', label: 'Swaps', icon: MapPin, desc: 'PIN handoffs, local pickup spots & events' }]
+    : []),
   { id: 'clubs', label: 'Book Clubs', icon: Users, desc: 'Reading groups, reflections & discussions' },
   { id: 'leaderboard', label: 'Rankings', icon: Trophy, desc: 'Community honors, top readers & badges' },
   { id: 'analytics', label: 'Analytics', icon: BarChart2, desc: 'Honesty score, reading velocity & stats' },
@@ -371,7 +375,7 @@ export default function LibraryPage() {
               <LoansCalendarTab />
             )}
 
-            {activeTab === 'swaps' && (
+            {FEATURES.swaps && activeTab === 'swaps' && (
               <PhysicalSwapsTab />
             )}
 

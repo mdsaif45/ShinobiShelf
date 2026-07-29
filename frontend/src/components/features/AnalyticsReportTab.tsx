@@ -17,6 +17,7 @@ import { useAuth } from '../../providers/AuthProvider';
 import { subscribeToBooks } from '../../services/bookService';
 import { subscribeToBorrowRequests } from '../../services/loanService';
 import { Book, BorrowRequest } from '../../types';
+import { FEATURES } from '@/config/features';
 
 export default function AnalyticsReportTab() {
   const { user } = useAuth();
@@ -51,23 +52,16 @@ export default function AnalyticsReportTab() {
   const onTimeCount = returnedLoans.filter(l => l.returnedOnTime !== false).length;
   const onTimeRate = returnedLoans.length > 0 ? Math.round((onTimeCount / returnedLoans.length) * 100) : 100;
 
-  // Monthly Activity Data for Recharts
+  // These two datasets were invented: fixed Feb-Jun activity and fixed genre
+  // percentages, shown identically to every account including same-day
+  // registrations with no loans at all. Presenting fabricated history as a
+  // personal reading record is worse than showing nothing, so the widgets are
+  // gated behind FEATURES.analyticsCharts until they are derived from real data.
   const monthlyData = [
-    { month: 'Feb', borrowed: 1, returned: 1 },
-    { month: 'Mar', borrowed: 2, returned: 2 },
-    { month: 'Apr', borrowed: 1, returned: 1 },
-    { month: 'May', borrowed: 3, returned: 3 },
-    { month: 'Jun', borrowed: 2, returned: 2 },
-    { month: 'Jul', borrowed: totalBorrowed > 0 ? totalBorrowed : 4, returned: returnedLoans.length > 0 ? returnedLoans.length : 3 },
+    { month: 'Jul', borrowed: totalBorrowed, returned: returnedLoans.length },
   ];
 
-  // Genre Distribution Mock / Derived Data
-  const genreData = [
-    { name: 'Fiction', value: 45 },
-    { name: 'Philosophy', value: 25 },
-    { name: 'Biography', value: 15 },
-    { name: 'Science', value: 15 },
-  ];
+  const genreData: Array<{ name: string; value: number }> = [];
   const COLORS = ['#4B5320', '#2D5A27', '#D4A373', '#BC8F8F'];
 
   return (
@@ -166,9 +160,10 @@ export default function AnalyticsReportTab() {
 
       </div>
 
-      {/* Visual Charts */}
+      {/* Visual Charts. Gated: see FEATURES.analyticsCharts. */}
+      {FEATURES.analyticsCharts && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Monthly Activity Bar Chart */}
         <Card className="lg:col-span-2 bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-sm">
           <h3 className="font-serif text-lg font-semibold text-[#2C2C2C] mb-4 flex items-center gap-2">
@@ -226,8 +221,10 @@ export default function AnalyticsReportTab() {
         </Card>
 
       </div>
+      )}
 
       {/* Honesty Timeline & Achievements */}
+      {FEATURES.analyticsCharts && (
       <Card className="bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-sm">
         <h3 className="font-serif text-lg font-semibold text-[#2C2C2C] mb-4 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-[#4B5320]" />
@@ -261,6 +258,33 @@ export default function AnalyticsReportTab() {
           </div>
         </div>
       </Card>
+      )}
+
+      {/* The welcome credit is real for every account, so it stays visible even
+          while the fabricated log entries above are gated off. */}
+      {!FEATURES.analyticsCharts && (
+        <Card className="bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-sm">
+          <h3 className="font-serif text-lg font-semibold text-[#2C2C2C] mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#4B5320]" />
+            Honesty Point Log
+          </h3>
+          <div className="p-3 bg-[#F9F7F4] border border-[#E5E0D8] rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
+                +100
+              </div>
+              <div>
+                <p className="font-semibold text-xs text-[#2C2C2C]">Welcome to Circle</p>
+                <p className="text-[10px] text-[#8C867E]">Initial trust baseline credited upon registration</p>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono text-[#8C867E]">Welcome Bonus</span>
+          </div>
+          <p className="mt-3 text-[11px] text-[#8C867E] italic">
+            Detailed borrowing history and genre insights arrive once more of your activity is tracked.
+          </p>
+        </Card>
+      )}
 
     </div>
   );
