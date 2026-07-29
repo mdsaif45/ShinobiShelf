@@ -23,6 +23,48 @@ export class LoanService {
     ownerName?: string;
     requestedDurationDays?: number;
   }): Promise<BorrowRequest> {
+    const book = await this.bookRepo.findById(data.bookId);
+    if (!book) {
+      throw Object.assign(new Error('That book no longer exists.'), { status: 404 });
+    }
+
+    // Nobody may borrow their own book. The UI blocks this, but a direct API
+    // call would otherwise sail through.
+    if (book.ownerId === data.borrowerId) {
+      throw Object.assign(new Error('You cannot borrow your own book.'), { status: 400 });
+    }
+
+    const existing = await this.loanRepo.findAll();
+
+    // One open request per borrower per book. Without this, submitting twice
+    // created two simultaneous PENDING requests for the same book.
+    const duplicate = existing.find(
+      (l) =>
+        l.bookId === data.bookId &&
+        l.borrowerId === data.borrowerId &&
+        (l.status === 'PENDING' || l.status === 'APPROVED' || l.status === 'HANDED_OVER')
+    );
+    if (duplicate) {
+      throw Object.assign(
+        new Error('You already have an open request for this book.'),
+        { status: 409 }
+      );
+    }
+
+    // A book that is already promised to someone else cannot be requested.
+    // Previously a third party could queue a request on an active loan.
+    const alreadyCommitted = existing.find(
+      (l) =>
+        l.bookId === data.bookId &&
+        (l.status === 'APPROVED' || l.status === 'HANDED_OVER')
+    );
+    if (alreadyCommitted || book.status === 'BORROWED') {
+      throw Object.assign(
+        new Error('That book is currently on loan. Please try again later.'),
+        { status: 409 }
+      );
+    }
+
     const handshakeCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     return await this.loanRepo.create({
@@ -77,14 +119,35 @@ export class LoanService {
       return loan;
     }
 
-    const updated = await this.loanRepo.updateStatus(loanId, status, updates);
+    const extraUpdates: Partial<BorrowRequest> = { ...updates };
+
+    // Approval is the moment the loan period is fixed. These were never set,
+    // which left the UI rendering a blank "Due:" and a broken "to ( days)".
+    if (status === 'APPROVED') {
+      const days = loan.requestedDurationDays || 14;
+      const start = new Date();
+      const due = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+      if (!loan.startDate) extraUpdates.startDate = start.toISOString();
+      if (!loan.dueDate) extraUpdates.dueDate = due.toISOString();
+    }
+
+    // No returned-at handling here: the repository already stamps
+    // returned_at = CURRENT_TIMESTAMP on a RETURNED transition.
+
+    const updated = await this.loanRepo.updateStatus(loanId, status, extraUpdates);
     if (!updated) {
       throw Object.assign(new Error('Loan request not found'), { status: 404 });
     }
 
     // Keep the book's availability in step with the loan.
+    //
+    // APPROVED is included deliberately: the book is committed to a borrower
+    // from that point, not only once physically handed over. Marking it only on
+    // HANDED_OVER left every approved book showing as "Available" with a live
+    // Borrow button, which let a third party queue a request on a book that was
+    // already lent out.
     if (loan.bookId) {
-      if (status === 'HANDED_OVER') {
+      if (status === 'APPROVED' || status === 'HANDED_OVER') {
         await this.bookRepo.update(loan.bookId, {
           status: 'BORROWED',
           currentReader: { uid: loan.borrowerId },
@@ -96,6 +159,12 @@ export class LoanService {
           progress: 0,
         });
       }
+    }
+
+    // Lifetime counters, which were declared in the schema but never written.
+    if (status === 'HANDED_OVER') {
+      if (loan.borrowerId) await this.userRepo.incrementBorrowedCount(loan.borrowerId);
+      if (loan.ownerId) await this.userRepo.incrementLentCount(loan.ownerId);
     }
 
     // A return that happens on or before the due date earns the borrower

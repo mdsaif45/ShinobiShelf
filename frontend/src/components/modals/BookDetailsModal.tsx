@@ -115,12 +115,16 @@ export default function BookDetailsModal({ book, open, onOpenChange, onBorrowCli
   if (!book) return null;
 
   const isAvailable = book.status === 'AVAILABLE';
-  const isReader = user && (book.currentReader?.uid === user.uid || book.ownerId === user.uid);
+  // AuthUser exposes `id`; `user.uid` is always undefined, so this comparison
+  // never matched and isReader was permanently false.
+  const isReader = !!user && (book.currentReader?.uid === user.id || book.ownerId === user.id);
 
-  // Calculate Average Rating
-  const avgRating = reviews.length > 0 
-    ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
-    : '5.0';
+  // Null rather than a fabricated default: this previously fell back to '5.0',
+  // so an unreviewed book advertised a perfect score alongside "(0 reviews)".
+  const avgRating =
+    reviews.length > 0
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length).toFixed(1)
+      : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,11 +152,22 @@ export default function BookDetailsModal({ book, open, onOpenChange, onBorrowCli
               </div>
             )}
 
-            {/* Average Rating Score */}
+            {/* Average rating, shown only once there is something to average. */}
             <div className="mt-4 flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-[#E5E0D8] shadow-sm">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span className="font-serif font-bold text-xs text-[#2C2C2C]">{avgRating}</span>
-              <span className="text-[10px] text-[#8C867E]">({reviews.length} reviews)</span>
+              {avgRating ? (
+                <>
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <span className="font-serif font-bold text-xs text-[#2C2C2C]">{avgRating}</span>
+                  <span className="text-[10px] text-[#8C867E]">
+                    ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Star className="w-4 h-4 text-[#D8D3CC]" />
+                  <span className="text-[10px] text-[#8C867E]">No reviews yet</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -250,7 +265,9 @@ export default function BookDetailsModal({ book, open, onOpenChange, onBorrowCli
             <div className="pt-4 border-t border-[#E5E0D8] space-y-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C867E] flex items-center justify-between">
                 <span>Circle Reviews ({reviews.length})</span>
-                <span className="text-[10px] text-[#4B5320] font-normal lowercase">★ {avgRating} avg</span>
+                {avgRating && (
+                  <span className="text-[10px] text-[#4B5320] font-normal lowercase">★ {avgRating} avg</span>
+                )}
               </h4>
 
               {/* Add Review Form */}

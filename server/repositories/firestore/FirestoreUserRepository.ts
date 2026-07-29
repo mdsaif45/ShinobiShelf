@@ -42,6 +42,20 @@ export class FirestoreUserRepository implements IUserRepository {
     return newScore;
   }
 
+  async incrementBorrowedCount(userId: string): Promise<void> {
+    const docRef = this.collection.doc(userId);
+    const snap = await docRef.get();
+    const current = snap.exists ? snap.data()?.booksBorrowedCount || 0 : 0;
+    await docRef.set({ booksBorrowedCount: current + 1 }, { merge: true });
+  }
+
+  async incrementLentCount(userId: string): Promise<void> {
+    const docRef = this.collection.doc(userId);
+    const snap = await docRef.get();
+    const current = snap.exists ? snap.data()?.booksLentCount || 0 : 0;
+    await docRef.set({ booksLentCount: current + 1 }, { merge: true });
+  }
+
   async findByEmail(email: string): Promise<any | null> {
     const snap = await this.collection.where('email', '==', email.toLowerCase()).get();
     if (snap.empty) return null;
