@@ -1,40 +1,30 @@
 import { UserProfile } from '../types';
 import { subscribePolled } from './poll';
+import { getJson, sendJson } from './http';
 
-const fetchUsers = async (): Promise<UserProfile[]> => {
-  const res = await fetch('/api/users');
-  if (!res.ok) throw new Error(`GET /api/users failed: ${res.status}`);
-  return res.json();
-};
+const fetchUsers = (): Promise<UserProfile[]> => getJson<UserProfile[]>('/api/users');
 
 export const subscribeToUsers = (callback: (users: UserProfile[]) => void) =>
   subscribePolled('users', fetchUsers, callback);
 
-export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+export const getUserProfile = async (_userId: string): Promise<UserProfile | null> => {
   try {
-    const token = localStorage.getItem('authToken');
-    const res = await fetch('/api/auth/me', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return data.user;
-    }
+    const data = await getJson<{ user: UserProfile }>('/api/auth/me');
+    return data.user;
   } catch (e) {
     console.warn('Error fetching user profile:', e);
+    return null;
   }
-  return null;
 };
 
+/**
+ * Callers inspect `result.error` rather than catching, so a failed update is
+ * returned as `{ error }` instead of throwing.
+ */
 export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>) => {
-  const token = localStorage.getItem('authToken');
-  const res = await fetch(`/api/users/${userId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(updates),
-  });
-  return await res.json();
+  try {
+    return await sendJson<UserProfile>(`/api/users/${userId}`, 'PATCH', updates);
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update profile.' } as any;
+  }
 };

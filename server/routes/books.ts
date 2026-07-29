@@ -13,8 +13,9 @@ const bookRepository = RepositoryFactory.getBookRepository();
 const bookService = new BookService(bookRepository);
 const bookController = new BookController(bookService);
 
-router.get('/', bookController.getAllBooks);
-router.get('/:id', bookController.getBookById);
+// The catalogue exposes owner display names, so it is not anonymous data.
+router.get('/', requireAuth, bookController.getAllBooks);
+router.get('/:id', requireAuth, bookController.getBookById);
 router.post('/', requireAuth, validateRequest(createBookSchema), bookController.createBook);
 router.delete('/:id', requireAuth, bookController.deleteBook);
 
