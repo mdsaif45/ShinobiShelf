@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '../../providers/AuthProvider';
+import { useToast } from '../../providers/ToastProvider';
 import { WishlistItem } from '../../types';
 import { subscribeToWishlist, addWishlistItem, toggleUpvote, addOfferToWishlistItem } from '../../services/wishlistService';
 import { CustomSelect } from '@/components/ui/CustomSelect';
@@ -35,6 +36,7 @@ interface WishlistBoardTabProps {
 
 export default function WishlistBoardTab({ onAddBookToCatalog }: WishlistBoardTabProps) {
   const { user } = useAuth();
+  const { notify, notifyError } = useToast();
   const [requests, setRequests] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -79,14 +81,13 @@ export default function WishlistBoardTab({ onAddBookToCatalog }: WishlistBoardTa
         author: author.trim() || 'Unknown',
         notes: note.trim(),
         category: genre,
-        requesterId: user.id || user.uid,
-        requesterName: user.displayName || user.email?.split('@')[0] || 'Community Member',
       });
 
       setTitle('');
       setAuthor('');
       setNote('');
       setIsModalOpen(false);
+      notify(`Posted your request for ${title.trim()}.`);
     } catch (err: any) {
       console.error('Error adding wishlist request:', err);
       setError(err.message || 'Failed to post request.');
@@ -98,10 +99,12 @@ export default function WishlistBoardTab({ onAddBookToCatalog }: WishlistBoardTa
   const handleToggleUpvote = async (reqItem: any) => {
     if (!user) return;
     try {
-      await toggleUpvote(reqItem.id, user.id || user.uid);
-      setRequests([...requests]);
-    } catch (err) {
+      // The server derives the voter from the session and returns the updated
+      // item; the poll refresh inside the service picks it up.
+      await toggleUpvote(reqItem.id);
+    } catch (err: any) {
       console.error('Error toggling upvote:', err);
+      notifyError(err?.message || 'Could not record that. Please try again.');
     }
   };
 
@@ -111,24 +114,21 @@ export default function WishlistBoardTab({ onAddBookToCatalog }: WishlistBoardTa
 
     setOffering(true);
     try {
-      const offerObj = {
-        offererId: user.id || user.uid,
-        offererName: user.displayName || user.email?.split('@')[0] || 'Lender',
-        offererAvatar: user.photoURL || '',
-        message: offerMessage.trim() || "I have a copy of this book available to lend!",
-        createdAt: new Date().toISOString()
-      };
-
-      await addOfferToWishlistItem(offerModalItem.id, offerObj);
+      // Identity comes from the session server-side; only the message is sent.
+      await addOfferToWishlistItem(offerModalItem.id, {
+        message: offerMessage.trim() || 'I have a copy of this book available to lend!',
+      });
 
       setOfferSuccess(true);
+      notify(`Offer sent for ${offerModalItem.title}.`);
       setTimeout(() => {
         setOfferSuccess(false);
         setOfferModalItem(null);
         setOfferMessage('');
       }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error sending offer:', err);
+      notifyError(err?.message || 'Could not send that offer. Please try again.');
     } finally {
       setOffering(false);
     }

@@ -3,6 +3,7 @@ import { Search, Plus, Loader2, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '../../providers/AuthProvider';
+import { useToast } from '../../providers/ToastProvider';
 import { addBook } from '../../services/bookService';
 
 interface OpenLibraryBook {
@@ -45,6 +46,7 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
   const [adding, setAdding] = useState<string | null>(null);
   const [searchError, setSearchError] = useState('');
   const { user } = useAuth();
+  const { notify, notifyError } = useToast();
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -70,7 +72,11 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
       const data = await response.json();
       setResults(data.docs || []);
     } catch (error) {
+      // A failed lookup used to look identical to "no matches found", so the
+      // reason is stated instead.
       console.error('Error searching books:', error);
+      setResults([]);
+      setSearchError('Could not reach the book catalogue. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -114,9 +120,12 @@ export default function AddBookModal({ open, onOpenChange }: { open: boolean, on
       onOpenChange(false);
       setQuery('');
       setResults([]);
+      notify(`Added ${book.title} to your shelf.`);
     } catch (error: any) {
       console.error('Error adding book:', error);
-      alert('Error adding book: ' + error.message);
+      // Was a blocking window.alert, which reads as a browser fault rather
+      // than an in-app message.
+      notifyError(error?.message || 'Could not add that book. Please try again.');
     } finally {
       setAdding(null);
     }
