@@ -166,8 +166,33 @@ CREATE TABLE IF NOT EXISTS event_attendees (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 13. Wishlist Upvotes ("Me Too") — Many-to-Many Join Table
+-- WishlistItem carries an `upvotes` array but had no table behind it.
+CREATE TABLE IF NOT EXISTS wishlist_upvotes (
+    item_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (item_id, user_id),
+    FOREIGN KEY (item_id) REFERENCES wishlist_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 14. Wishlist Lending Offers ("I Can Lend This")
+CREATE TABLE IF NOT EXISTS wishlist_offers (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL,
+    offerer_id TEXT NOT NULL,
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (item_id, offerer_id),
+    FOREIGN KEY (item_id) REFERENCES wishlist_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (offerer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Optimization Indexes
 CREATE INDEX IF NOT EXISTS idx_books_owner ON books(owner_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_upvotes_item ON wishlist_upvotes(item_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_offers_item ON wishlist_offers(item_id);
 CREATE INDEX IF NOT EXISTS idx_books_status ON books(status);
 CREATE INDEX IF NOT EXISTS idx_borrow_requests_book ON borrow_requests(book_id);
 CREATE INDEX IF NOT EXISTS idx_borrow_requests_borrower ON borrow_requests(borrower_id);

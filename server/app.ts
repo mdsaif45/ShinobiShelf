@@ -5,6 +5,8 @@ import authRouter from "./routes/auth";
 import booksRouter from "./routes/books";
 import loansRouter from "./routes/loans";
 import usersRouter from "./routes/users";
+import wishlistRouter from "./routes/wishlist";
+import clubsRouter from "./routes/clubs";
 import { errorHandler } from "./middleware/errorHandler";
 
 export async function createApp() {
@@ -22,6 +24,8 @@ export async function createApp() {
   app.use("/api/books", booksRouter);
   app.use("/api/loans", loansRouter);
   app.use("/api/users", usersRouter);
+  app.use("/api/wishlist", wishlistRouter);
+  app.use("/api/clubs", clubsRouter);
 
   // OAuth Callback Popup Handler
   app.get(['/auth/callback', '/auth/callback/'], (req, res) => {
