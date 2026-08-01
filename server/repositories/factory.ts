@@ -4,6 +4,7 @@ import { ILoanRepository } from './interfaces/ILoanRepository';
 import { IUserRepository } from './interfaces/IUserRepository';
 import { IWishlistRepository } from './interfaces/IWishlistRepository';
 import { IClubRepository } from './interfaces/IClubRepository';
+import { IEbookRepository } from './interfaces/IEbookRepository';
 
 import { FirestoreBookRepository } from './firestore/FirestoreBookRepository';
 import { FirestoreLoanRepository } from './firestore/FirestoreLoanRepository';
@@ -14,6 +15,7 @@ import { SqliteLoanRepository } from './sqlite/SqliteLoanRepository';
 import { SqliteUserRepository } from './sqlite/SqliteUserRepository';
 import { SqliteWishlistRepository } from './sqlite/SqliteWishlistRepository';
 import { SqliteClubRepository } from './sqlite/SqliteClubRepository';
+import { SqliteEbookRepository } from './sqlite/SqliteEbookRepository';
 
 export class RepositoryFactory {
   private static bookRepo: IBookRepository;
@@ -21,6 +23,7 @@ export class RepositoryFactory {
   private static userRepo: IUserRepository;
   private static wishlistRepo: IWishlistRepository;
   private static clubRepo: IClubRepository;
+  private static ebookRepo: IEbookRepository;
 
   public static getBookRepository(): IBookRepository {
     if (!this.bookRepo) {
@@ -97,4 +100,17 @@ export class RepositoryFactory {
     }
     return this.clubRepo;
   }
+
+  public static getEbookRepository(): IEbookRepository {
+    if (!this.ebookRepo) {
+      if (envConfig.dbProvider !== 'sqlite') {
+        throw new Error(
+          `Ebook storage is only implemented for the sqlite provider (got "${envConfig.dbProvider}").`
+        );
+      }
+      this.ebookRepo = new SqliteEbookRepository();
+    }
+    return this.ebookRepo;
+  }
 }
+

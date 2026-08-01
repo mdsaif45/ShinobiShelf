@@ -18,6 +18,7 @@ import WishlistBoardTab from '../components/features/WishlistBoardTab';
 import BookClubsTab from '../components/features/BookClubsTab';
 import LeaderboardBadgesTab from '../components/features/LeaderboardBadgesTab';
 import PhysicalSwapsTab from '../components/features/PhysicalSwapsTab';
+import EbookLibraryTab from '../components/features/EbookLibraryTab';
 
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { FEATURES } from '@/config/features';
@@ -41,6 +42,7 @@ const PRIMARY_TABS = [
   { id: 'global', label: 'Catalog', icon: Globe },
   { id: 'loans', label: 'Loans', icon: Calendar },
   { id: 'owned', label: 'My Books', icon: BookMarked },
+  { id: 'ereader', label: 'E-Reader', icon: BookOpen },
   { id: 'wishlist', label: 'Wishlist', icon: Heart },
 ];
 
@@ -373,6 +375,10 @@ export default function LibraryPage() {
 
             {activeTab === 'loans' && (
               <LoansCalendarTab />
+            )}
+
+            {activeTab === 'ereader' && (
+              <EbookLibraryTab />
             )}
 
             {FEATURES.swaps && activeTab === 'swaps' && (

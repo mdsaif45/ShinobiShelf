@@ -7,6 +7,7 @@ import loansRouter from "./routes/loans";
 import usersRouter from "./routes/users";
 import wishlistRouter from "./routes/wishlist";
 import clubsRouter from "./routes/clubs";
+import ebooksRouter from "./routes/ebooks";
 import { errorHandler } from "./middleware/errorHandler";
 
 export async function createApp() {
@@ -26,6 +27,7 @@ export async function createApp() {
   app.use("/api/users", usersRouter);
   app.use("/api/wishlist", wishlistRouter);
   app.use("/api/clubs", clubsRouter);
+  app.use("/api/ebooks", ebooksRouter);
 
   // OAuth Callback Popup Handler
   app.get(['/auth/callback', '/auth/callback/'], (req, res) => {
