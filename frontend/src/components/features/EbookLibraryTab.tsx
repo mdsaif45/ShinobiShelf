@@ -9,7 +9,6 @@ import {
   Clock,
   Sparkles,
   BarChart3,
-  CheckCircle2,
   HardDrive,
 } from 'lucide-react';
 import { Ebook } from '../../types';
@@ -87,9 +86,9 @@ export default function EbookLibraryTab() {
 
   const getFormatBadgeStyle = (format: string) => {
     const f = format.toLowerCase();
-    if (f === 'epub') return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20';
-    if (f === 'pdf') return 'bg-rose-500/10 text-rose-700 border-rose-500/20';
-    return 'bg-blue-500/10 text-blue-700 border-blue-500/20';
+    if (f === 'epub') return 'bg-[#2D5A27]/10 text-[#2D5A27] border-[#2D5A27]/20';
+    if (f === 'pdf') return 'bg-[#D44D22]/10 text-[#D44D22] border-[#D44D22]/20';
+    return 'bg-blue-600/10 text-blue-700 border-blue-600/20';
   };
 
   const totalBytes = ebooks.reduce((acc, b) => acc + b.fileSize, 0);
@@ -99,90 +98,60 @@ export default function EbookLibraryTab() {
       : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header & Stats Banner */}
-      <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-emerald-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5" /> E-Reader Digital Shelf
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Personal E-Book Library
-            </h1>
-            <p className="text-stone-300 text-sm mt-1 max-w-lg">
-              Upload EPUB, PDF, or TXT ebooks, customize reading themes, and resume reading anytime with automatic progress tracking.
-            </p>
+    <div className="space-y-5">
+      {/* Sleek Integrated Header Bar matching ShinobiShelf Theme */}
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E5E0D8] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2C2C2C]">
+              Digital E-Reader Shelf
+            </h2>
+            <span className="bg-[#4B5320]/10 text-[#4B5320] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#4B5320]/20">
+              {ebooks.length} {ebooks.length === 1 ? 'E-Book' : 'E-Books'}
+            </span>
           </div>
-
-          <button
-            onClick={() => setUploadModalOpen(true)}
-            className="bg-emerald-500 hover:bg-emerald-600 text-stone-950 font-bold px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-emerald-500/25 shrink-0"
-          >
-            <Plus className="w-5 h-5" />
-            Upload Ebook
-          </button>
+          <p className="text-xs text-[#8C867E] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>Upload EPUB, PDF, or TXT ebooks to read with synced progress</span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden md:inline text-[#2D5A27] font-semibold">Avg Progress: {avgProgress}%</span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden md:inline text-[#8C867E]">Storage: {formatSize(totalBytes)}</span>
+          </p>
         </div>
 
-        {/* Stats Strip */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-stone-400">Total Digital Books</p>
-              <p className="text-lg font-bold">{ebooks.length}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-stone-400">Average Reading %</p>
-              <p className="text-lg font-bold">{avgProgress}%</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-purple-400">
-              <HardDrive className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs text-stone-400">Shelf Storage</p>
-              <p className="text-lg font-bold">{formatSize(totalBytes)}</p>
-            </div>
-          </div>
-        </div>
+        <button
+          onClick={() => setUploadModalOpen(true)}
+          className="bg-[#4B5320] hover:bg-[#3D441A] text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm shrink-0 cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          Upload Ebook
+        </button>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-[#E5E0D8] shadow-sm">
         {/* Search */}
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-[#8C867E] absolute left-3.5 top-2.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search ebooks by title or author..."
-            className="w-full pl-10 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            placeholder="Search title or author..."
+            className="w-full pl-9 pr-3 py-1.5 bg-[#F9F7F4] border border-[#E5E0D8] rounded-xl text-xs text-[#2C2C2C] focus:outline-none focus:ring-1 focus:ring-[#4B5320]"
           />
         </div>
 
         {/* Format Filter Tabs */}
-        <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-lg w-full sm:w-auto">
+        <div className="flex items-center gap-1 bg-[#F5F2ED] p-1 rounded-xl w-full sm:w-auto">
           {['All', 'EPUB', 'PDF', 'TXT'].map((fmt) => (
             <button
               key={fmt}
               onClick={() => setFormatFilter(fmt)}
-              className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+              className={`px-3.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 formatFilter === fmt
-                  ? 'bg-white text-stone-900 shadow-sm'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#2C2C2C] shadow-sm font-bold'
+                  : 'text-[#8C867E] hover:text-[#2C2C2C]'
               }`}
             >
               {fmt}
@@ -193,91 +162,91 @@ export default function EbookLibraryTab() {
 
       {/* Ebooks Grid */}
       {loading ? (
-        <div className="py-20 text-center text-stone-500">Loading digital shelf...</div>
+        <div className="py-20 text-center text-[#8C867E]">Loading digital shelf...</div>
       ) : filteredEbooks.length === 0 ? (
-        <div className="py-16 text-center bg-white rounded-2xl border border-stone-200 p-8 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-            <BookOpen className="w-8 h-8" />
+        <div className="py-16 text-center bg-white rounded-2xl border border-[#E5E0D8] p-8 space-y-4">
+          <div className="w-14 h-14 rounded-full bg-[#4B5320]/10 text-[#4B5320] flex items-center justify-center mx-auto">
+            <BookOpen className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-stone-900">No Ebooks Found</h3>
-          <p className="text-stone-500 text-sm max-w-sm mx-auto">
+          <h3 className="font-serif text-lg font-bold text-[#2C2C2C]">No Ebooks Found</h3>
+          <p className="text-[#8C867E] text-xs max-w-sm mx-auto">
             {searchQuery || formatFilter !== 'All'
               ? 'No digital books matched your search criteria.'
               : 'Your digital shelf is empty. Upload your first EPUB, PDF, or TXT ebook to start reading.'}
           </p>
           <button
             onClick={() => setUploadModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#4B5320] hover:bg-[#3D441A] text-white font-semibold rounded-xl text-xs transition-colors shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Upload Ebook
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           <AnimatePresence>
             {filteredEbooks.map((book) => (
               <motion.div
                 key={book.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 onClick={() => handleOpenReader(book)}
-                className="bg-white rounded-2xl border border-stone-200 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between overflow-hidden"
+                className="bg-white rounded-2xl border border-[#E5E0D8] shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col justify-between overflow-hidden h-full"
               >
                 {/* Cover & Header */}
                 <div>
-                  <div className="relative h-44 bg-stone-100 flex items-center justify-center overflow-hidden border-b border-stone-100">
+                  <div className="aspect-[2/3] bg-[#F9F7F4] relative overflow-hidden flex items-center justify-center p-3 border-b border-[#E5E0D8]">
                     {book.coverUrl ? (
                       <img
                         src={book.coverUrl}
                         alt={book.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover rounded-sm shadow group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-stone-800 to-stone-900 p-6 flex flex-col justify-between text-white relative">
+                      <div className="w-full h-full bg-gradient-to-br from-[#4B5320] to-[#2B3012] p-4 flex flex-col justify-between text-white rounded-sm shadow relative">
                         <div className="flex justify-between items-start">
-                          <span className={`px-2.5 py-1 text-[10px] font-extrabold rounded-md border backdrop-blur-md ${getFormatBadgeStyle(book.fileFormat)}`}>
+                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded border backdrop-blur-md ${getFormatBadgeStyle(book.fileFormat)}`}>
                             {book.fileFormat.toUpperCase()}
                           </span>
                           <button
                             onClick={(e) => handleDelete(e, book.id, book.title)}
-                            className="p-1.5 rounded-lg bg-black/40 hover:bg-rose-600 text-stone-300 hover:text-white transition-colors"
+                            className="p-1.5 rounded-lg bg-black/40 hover:bg-rose-600 text-stone-200 hover:text-white transition-colors"
                             title="Delete ebook"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         <div>
-                          <p className="font-bold text-sm line-clamp-2 leading-tight">{book.title}</p>
-                          <p className="text-xs text-stone-400 mt-1 line-clamp-1">{book.author}</p>
+                          <p className="font-serif font-bold text-xs line-clamp-2 leading-tight">{book.title}</p>
+                          <p className="text-[10px] text-stone-300 mt-1 italic line-clamp-1">{book.author || 'Unknown'}</p>
                         </div>
                       </div>
                     )}
                   </div>
 
                   {/* Info */}
-                  <div className="p-4 space-y-3">
+                  <div className="p-3 space-y-2.5">
                     <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-stone-900 text-sm line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <h3 className="font-serif font-bold text-[#2C2C2C] text-xs line-clamp-1 group-hover:text-[#4B5320] transition-colors">
                           {book.title}
                         </h3>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded border shrink-0 ${getFormatBadgeStyle(book.fileFormat)}`}>
+                        <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded border shrink-0 ${getFormatBadgeStyle(book.fileFormat)}`}>
                           {book.fileFormat.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">{book.author || 'Unknown Author'}</p>
+                      <p className="text-[11px] text-[#8C867E] italic line-clamp-1 mt-0.5">{book.author || 'Unknown Author'}</p>
                     </div>
 
                     {/* Progress Bar */}
                     <div>
-                      <div className="flex items-center justify-between text-xs text-stone-500 mb-1">
-                        <span className="font-medium">Reading Progress</span>
-                        <span className="font-bold text-emerald-600">{book.progressPercent || 0}%</span>
+                      <div className="flex items-center justify-between text-[10px] text-[#8C867E] mb-1">
+                        <span>Progress</span>
+                        <span className="font-bold text-[#4B5320]">{book.progressPercent || 0}%</span>
                       </div>
-                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1.5 bg-[#F0EEEB] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-emerald-500 transition-all duration-300"
+                          className="h-full bg-[#4B5320] rounded-full transition-all duration-300"
                           style={{ width: `${book.progressPercent || 0}%` }}
                         />
                       </div>
@@ -286,9 +255,9 @@ export default function EbookLibraryTab() {
                 </div>
 
                 {/* Footer Action */}
-                <div className="px-4 pb-4 pt-1 flex items-center justify-between border-t border-stone-100">
-                  <span className="text-[11px] text-stone-400 font-medium">{formatSize(book.fileSize)}</span>
-                  <button className="text-xs font-bold text-emerald-600 group-hover:text-emerald-700 flex items-center gap-1">
+                <div className="px-3 py-2 border-t border-dashed border-[#E5E0D8] flex items-center justify-between mt-auto">
+                  <span className="text-[10px] text-[#8C867E] font-medium">{formatSize(book.fileSize)}</span>
+                  <button className="text-xs font-bold text-[#4B5320] hover:text-[#3D441A] flex items-center gap-1">
                     <BookOpen className="w-3.5 h-3.5" />
                     Read Now
                   </button>
