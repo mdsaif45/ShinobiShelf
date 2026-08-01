@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Ebook } from '../../types';
 import { getEbookFileUrl, updateEbookProgress } from '../../services/ebookService';
+import { authHeaders } from '../../services/http';
 
 interface EbookReaderModalProps {
   ebook: Ebook | null;
@@ -65,7 +66,7 @@ export default function EbookReaderModal({
 
     async function loadEbookContent() {
       try {
-        const response = await fetch(fileUrl);
+        const response = await fetch(fileUrl, { headers: authHeaders() });
         if (!response.ok) throw new Error(`Failed to load ebook file (${response.status})`);
 
         const blob = await response.blob();
