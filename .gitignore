@@ -50,3 +50,6 @@ Desktop.ini
 .cache/
 .tmp/
 tmp/
+uploads/*
+!uploads/.gitkeep
+

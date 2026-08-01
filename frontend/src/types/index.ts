@@ -147,3 +147,21 @@ export interface UserProfile {
   booksBorrowedCount?: number;
   createdAt?: any;
 }
+
+export interface Ebook {
+  id: string;
+  title: string;
+  author: string;
+  description?: string;
+  filePath: string;
+  fileName: string;
+  fileSize: number;
+  fileFormat: 'epub' | 'pdf' | 'txt';
+  coverUrl?: string;
+  ownerId: string;
+  progressPercent: number;
+  currentLocation?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

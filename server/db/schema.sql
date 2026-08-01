@@ -189,8 +189,28 @@ CREATE TABLE IF NOT EXISTS wishlist_offers (
     FOREIGN KEY (offerer_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 15. Ebooks Table
+CREATE TABLE IF NOT EXISTS ebooks (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    author TEXT,
+    description TEXT,
+    file_path TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    file_format TEXT CHECK (file_format IN ('epub', 'pdf', 'txt')) NOT NULL,
+    cover_url TEXT,
+    owner_id TEXT NOT NULL,
+    progress_percent REAL DEFAULT 0,
+    current_location TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Optimization Indexes
 CREATE INDEX IF NOT EXISTS idx_books_owner ON books(owner_id);
+CREATE INDEX IF NOT EXISTS idx_ebooks_owner ON ebooks(owner_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_upvotes_item ON wishlist_upvotes(item_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_offers_item ON wishlist_offers(item_id);
 CREATE INDEX IF NOT EXISTS idx_books_status ON books(status);
@@ -200,3 +220,4 @@ CREATE INDEX IF NOT EXISTS idx_borrow_requests_owner ON borrow_requests(owner_id
 CREATE INDEX IF NOT EXISTS idx_wishlist_requester ON wishlist_items(requester_id);
 CREATE INDEX IF NOT EXISTS idx_club_posts_club ON club_posts(club_id);
 CREATE INDEX IF NOT EXISTS idx_club_memberships_user ON club_memberships(user_id);
+
