@@ -1,8 +1,31 @@
 rules_version = '2';
+
+// Circle / ShinobiShelf — Firestore security rules
+//
+// IMPORTANT: All legitimate application data access happens server-side
+// through the Firebase Admin SDK (see server/repositories/firestore/*,
+// which use `adminDb`). The Admin SDK bypasses these rules entirely, so
+// tightening them here does NOT affect the app's own read/write paths.
+//
+// The web client uses Firebase only for authentication — it never reads or
+// writes Firestore directly. These rules therefore lock down all *direct*
+// client access, closing the previous `allow read, write: if true` hole that
+// exposed the entire database to anyone holding the (public-by-design)
+// Firebase Web API key.
+//
+// After changing this file you MUST deploy it for it to take effect:
+//   firebase deploy --only firestore:rules
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Deny all direct client access by default. Server-side Admin SDK
+    // traffic is unaffected. If a future feature needs the web client to
+    // read/write Firestore directly, add a narrowly-scoped match block
+    // below (e.g. per-collection, ownership-checked) rather than widening
+    // this default.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }
