@@ -99,6 +99,8 @@ pnpm start
 
 ## 📄 License & Governance
 
+Released under the **[MIT License](./LICENSE)** — free to use, modify, and distribute, with attribution.
+
 - **[Code of Conduct](./CODE_OF_CONDUCT.md)**
 - **[Contributing Guidelines](./CONTRIBUTING.md)**
 - **[Security Policy](./SECURITY.md)**
